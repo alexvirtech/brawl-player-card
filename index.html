@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brawl Stars Player Card</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Brawl Stars Player Card</h1>
+
+    <!-- STEP 1: The player types their tag here -->
+    <div class="search-box">
+      <label for="tag-input">Enter your Player Tag:</label>
+      <input
+        type="text"
+        id="tag-input"
+        value="#2YJGQCYPCJ"
+        placeholder="#YOURTAG"
+      >
+      <button id="search-btn">Show my player card</button>
+    </div>
+
+    <!-- Loading spinner (hidden by default) -->
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Looking up player...</p>
+    </div>
+
+    <!-- Error message (hidden by default) -->
+    <div id="error" class="error hidden"></div>
+
+    <!-- STEP 6: The player card appears here -->
+    <div id="player-card" class="player-card hidden"></div>
+  </div>
+
+  <!-- Set API_BASE to your Heroku proxy URL for production -->
+  <!-- <script>window.API_BASE = "https://your-heroku-app.herokuapp.com"</script> -->
+  <script src="app.js"></script>
+</body>
+</html>
