@@ -13,7 +13,8 @@ const PORT = process.env.PORT || 3001
 const allowedDomain = process.env.ALLOWED_DOMAIN || ""
 
 function isAllowedOrigin(origin) {
-  if (!origin) return process.env.NODE_ENV !== "production"
+  if (!origin) return true
+  if (!allowedDomain) return true
   try {
     const hostname = new URL(origin).hostname
     return hostname === allowedDomain || hostname.endsWith("." + allowedDomain)
