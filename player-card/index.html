@@ -84,9 +84,9 @@
           </div>
 
           <h3 class="mt-20 mb-12" style="-webkit-text-fill-color:#ccc; font-size:1rem">Top Brawlers</h3>
-          ${player.brawlers.map((b, i) => `
+          ${player.brawlers.slice(0, 5).map((b, i) => `
             <div class="brawler-row">
-              <span class="brawler-rank">${medals[i]}</span>
+              <span class="brawler-rank">${medals[i] || "👊"}</span>
               <span class="brawler-name">${escapeHtml(b.name)}</span>
               <span class="brawler-trophies">${b.trophies.toLocaleString()} 🏆</span>
             </div>
