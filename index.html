@@ -6,19 +6,74 @@
   <title>Ben's Brawl Apps</title>
   <link rel="stylesheet" href="/css/common.css">
   <style>
+    /* === Hero Game Button === */
+    .hero-link {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      color: #f0f0f0;
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 56, 96, 0.12));
+      border: 2px solid rgba(255, 107, 53, 0.5);
+      border-radius: 20px;
+      padding: 32px 20px;
+      margin-top: 20px;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    }
+
+    .hero-link:hover {
+      transform: scale(1.03);
+      border-color: #ff6b35;
+      box-shadow: 0 8px 32px rgba(255, 107, 53, 0.35);
+    }
+
+    .hero-link:active {
+      transform: scale(0.98);
+    }
+
+    .hero-link .icon {
+      font-size: 3.5rem;
+      margin-bottom: 8px;
+    }
+
+    .hero-link .label {
+      font-size: 1.8rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #ffd700, #ff6b35);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-link .subtitle {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-top: 6px;
+    }
+
+    /* === Section Heading === */
+    .section-title {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+
+    /* === Mini-App Grid === */
     .app-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 20px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
 
     .app-link {
       display: block;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 20px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      padding: 14px 8px;
       text-align: center;
       text-decoration: none;
       color: #f0f0f0;
@@ -26,30 +81,30 @@
     }
 
     .app-link:hover {
-      transform: scale(1.03);
+      transform: scale(1.04);
       border-color: rgba(255, 215, 0, 0.4);
-      box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
+      box-shadow: 0 4px 16px rgba(255, 215, 0, 0.12);
     }
 
     .app-link .icon {
-      font-size: 2rem;
-      margin-bottom: 8px;
+      font-size: 1.5rem;
+      margin-bottom: 4px;
     }
 
     .app-link .label {
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.78rem;
     }
 
     .app-link .number {
-      font-size: 0.7rem;
-      color: #888;
-      margin-top: 4px;
+      font-size: 0.65rem;
+      color: #666;
+      margin-top: 2px;
     }
 
     @media (max-width: 400px) {
       .app-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
@@ -62,9 +117,15 @@
 
     <h1>⭐ Ben's Brawl Apps</h1>
 
-    <div class="text-center mb-20" style="color:#aaa">
-      10 mini-apps to learn programming with Brawl Stars!
-    </div>
+    <!-- Hero: BEN BATTLE -->
+    <a href="/game/" class="hero-link">
+      <div class="icon">🎮</div>
+      <div class="label">BEN BATTLE</div>
+      <div class="subtitle">Top-down arena game — PLAY NOW!</div>
+    </a>
+
+    <!-- Mini-Apps -->
+    <div class="section-title">Mini-Apps</div>
 
     <div class="app-grid">
       <a href="/player-card/" class="app-link">
@@ -87,7 +148,7 @@
 
       <a href="/find-brawler/" class="app-link">
         <div class="icon">🔍</div>
-        <div class="label">Find a Brawler</div>
+        <div class="label">Find Brawler</div>
         <div class="number">#4</div>
       </a>
 
@@ -99,31 +160,31 @@
 
       <a href="/compare-brawlers/" class="app-link">
         <div class="icon">⚔️</div>
-        <div class="label">Compare Brawlers</div>
+        <div class="label">Compare</div>
         <div class="number">#6</div>
       </a>
 
       <a href="/compare-players/" class="app-link">
         <div class="icon">🆚</div>
-        <div class="label">Compare Players</div>
+        <div class="label">VS Players</div>
         <div class="number">#7</div>
       </a>
 
       <a href="/random-brawler/" class="app-link">
         <div class="icon">🎲</div>
-        <div class="label">Random Brawler</div>
+        <div class="label">Random</div>
         <div class="number">#8</div>
       </a>
 
       <a href="/todays-challenge/" class="app-link">
         <div class="icon">🎯</div>
-        <div class="label">Today's Challenge</div>
+        <div class="label">Challenge</div>
         <div class="number">#9</div>
       </a>
 
       <a href="/brawler-gallery/" class="app-link">
         <div class="icon">🖼️</div>
-        <div class="label">Brawler Gallery</div>
+        <div class="label">Gallery</div>
         <div class="number">#10</div>
       </a>
     </div>
