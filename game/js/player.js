@@ -37,6 +37,11 @@ const Player = {
       dy /= len
     }
 
+    if (Input.touch.moveId !== null) {
+      dx = Input.touch.moveDx
+      dy = Input.touch.moveDy
+    }
+
     this.x += dx * cfg.speed * dt
     this.y += dy * cfg.speed * dt
 
@@ -44,10 +49,15 @@ const Player = {
     this.x = pos.x
     this.y = pos.y
 
-    this.angle = Math.atan2(Input.mouse.y - this.y, Input.mouse.x - this.x)
+    if (Input.touch.shooting) {
+      this.angle = Math.atan2(Input.touch.shootY - this.y, Input.touch.shootX - this.x)
+    } else {
+      this.angle = Math.atan2(Input.mouse.y - this.y, Input.mouse.x - this.x)
+    }
 
     this.shootTimer -= dt * 1000
-    if ((Input.mouse.down || Input.isDown(' ')) && this.shootTimer <= 0) {
+    const shooting = Input.mouse.down || Input.isDown(' ') || Input.touch.shooting
+    if (shooting && this.shootTimer <= 0) {
       const bx = this.x + Math.cos(this.angle) * (cfg.size + 8)
       const by = this.y + Math.sin(this.angle) * (cfg.size + 8)
       Bullets.create(bx, by, Math.cos(this.angle), Math.sin(this.angle), true)

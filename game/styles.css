@@ -9,11 +9,14 @@ body {
   color: #f0f0f0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #game-wrapper {
@@ -29,6 +32,10 @@ body {
   height: 100%;
   border-radius: 8px;
   cursor: crosshair;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* === Score HUD === */
@@ -182,4 +189,88 @@ body {
   font-size: 3rem;
   font-weight: 900;
   margin-bottom: 24px;
+}
+
+/* === Mobile === */
+@media (max-width: 640px) {
+  body {
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  #game-wrapper {
+    border-radius: 0;
+    max-width: 100%;
+  }
+
+  #game-canvas {
+    border-radius: 0;
+  }
+
+  .overlay {
+    border-radius: 0;
+    padding: 16px;
+  }
+
+  .overlay h1 {
+    font-size: 2.2rem;
+  }
+
+  .overlay .subtitle {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+
+  .play-btn {
+    padding: 14px 40px;
+    font-size: 1.3rem;
+  }
+
+  #score-hud {
+    font-size: 0.85rem;
+    padding: 6px 16px;
+    top: 6px;
+  }
+
+  #sound-btn {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    top: 6px;
+    right: 6px;
+  }
+
+  #home-link {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    top: 6px;
+    left: 6px;
+  }
+
+  #end-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+  #game-wrapper {
+    width: 100%;
+    aspect-ratio: auto;
+    height: auto;
+  }
+
+  #game-canvas {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 960 / 640;
+  }
+}
+
+@media (max-width: 640px) and (orientation: landscape) {
+  #game-wrapper {
+    width: auto;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    aspect-ratio: 960 / 640;
+  }
 }

@@ -11,9 +11,11 @@ body {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   color: #f0f0f0;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   padding: 24px 16px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .container {
@@ -96,6 +98,7 @@ h1 {
 
 .tag-box button {
   padding: 12px 20px;
+  min-height: 48px;
   border: none;
   border-radius: 10px;
   background: linear-gradient(135deg, #ffd700, #ff6b35);

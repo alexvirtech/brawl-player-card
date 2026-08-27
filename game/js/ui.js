@@ -149,6 +149,47 @@ const UI = {
     ctx.textAlign = 'start'
   },
 
+  drawJoystick(ctx) {
+    if (!Input.joystick.visible) return
+
+    ctx.globalAlpha = 0.2
+    ctx.fillStyle = '#ffffff'
+    ctx.beginPath()
+    ctx.arc(Input.joystick.baseX, Input.joystick.baseY, 50, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.globalAlpha = 0.35
+    ctx.strokeStyle = '#ffffff'
+    ctx.lineWidth = 2
+    ctx.stroke()
+
+    ctx.globalAlpha = 0.5
+    ctx.fillStyle = '#ffd700'
+    ctx.beginPath()
+    ctx.arc(Input.joystick.stickX, Input.joystick.stickY, 20, 0, Math.PI * 2)
+    ctx.fill()
+
+    ctx.globalAlpha = 1
+  },
+
+  drawShootIndicator(ctx) {
+    if (!Input.touch.shooting) return
+
+    ctx.globalAlpha = 0.25
+    ctx.strokeStyle = '#ff6b35'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(Input.touch.shootX, Input.touch.shootY, 24, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(Input.touch.shootX - 10, Input.touch.shootY)
+    ctx.lineTo(Input.touch.shootX + 10, Input.touch.shootY)
+    ctx.moveTo(Input.touch.shootX, Input.touch.shootY - 10)
+    ctx.lineTo(Input.touch.shootX, Input.touch.shootY + 10)
+    ctx.stroke()
+
+    ctx.globalAlpha = 1
+  },
+
   updateDebug(fps, game) {
     if (!this.debugVisible) return
     const panel = document.getElementById('debug-panel')
@@ -160,6 +201,7 @@ const UI = {
       `Bullets: ${Bullets.list.length}`,
       `Bullet Damage: ${GAME_CONFIG.bullet.playerDamage}`,
       `Score to Win: ${GAME_CONFIG.game.winningScore}`,
+      `Touch: ${Input.touch.active ? 'YES' : 'NO'}`,
     ].join('<br>')
   },
 }

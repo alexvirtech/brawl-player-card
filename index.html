@@ -27,12 +27,13 @@
     }
 
     .hero-link:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
 
     .hero-link .icon {
       font-size: 3.5rem;
       margin-bottom: 8px;
+      line-height: 1;
     }
 
     .hero-link .label {
@@ -102,9 +103,50 @@
       margin-top: 2px;
     }
 
-    @media (max-width: 400px) {
+    @media (max-width: 480px) {
+      .hero-link {
+        padding: 28px 16px;
+      }
+
+      .hero-link .icon {
+        font-size: 3rem;
+      }
+
+      .hero-link .label {
+        font-size: 1.5rem;
+      }
+
       .app-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .app-link {
+        padding: 16px 8px;
+        min-height: 72px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .app-link .icon {
+        font-size: 1.6rem;
+        margin-bottom: 6px;
+      }
+
+      .app-link .label {
+        font-size: 0.82rem;
+      }
+    }
+
+    @media (max-width: 340px) {
+      .hero-link .label {
+        font-size: 1.3rem;
+      }
+
+      .app-link .label {
+        font-size: 0.75rem;
       }
     }
   </style>

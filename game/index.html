@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>BEN BATTLE</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -20,12 +20,22 @@
       <h1>BEN BATTLE</h1>
       <div class="subtitle">Ready to battle?</div>
       <button id="play-btn" class="play-btn">PLAY</button>
-      <div class="controls-info">
+      <div class="controls-info" id="controls-desktop">
         <strong>MOVE:</strong> WASD / Arrows<br>
         <strong>AIM:</strong> Mouse<br>
         <strong>SHOOT:</strong> Click / Space<br>
         <strong>DEBUG:</strong> F3
       </div>
+      <div class="controls-info" id="controls-touch" style="display:none">
+        <strong>MOVE:</strong> Drag left side<br>
+        <strong>SHOOT:</strong> Tap right side
+      </div>
+      <script>
+        if ('ontouchstart' in window) {
+          document.getElementById('controls-desktop').style.display = 'none'
+          document.getElementById('controls-touch').style.display = 'block'
+        }
+      </script>
     </div>
 
     <!-- End Screen -->

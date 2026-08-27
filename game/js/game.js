@@ -174,6 +174,9 @@ const Game = {
     this.enemies.forEach(e => e.draw(ctx))
     Bullets.draw(ctx)
 
+    UI.drawJoystick(ctx)
+    UI.drawShootIndicator(ctx)
+
     if (this.state === 'respawning') {
       UI.showRespawnMessage(ctx)
     }
