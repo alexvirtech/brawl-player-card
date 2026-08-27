@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Best Brawlers — Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      <span class="site-title">⭐ BEN'S BRAWL APPS</span>
+      <a href="/" class="home-link">← Home</a>
+    </div>
+
+    <div class="app-number">Mini-App #3</div>
+    <h1>⭐ My Best Brawlers</h1>
+
+    <div class="tag-box">
+      <input type="text" id="tag-input" placeholder="#YOURTAG">
+      <button id="load-btn">LOAD</button>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Loading player...</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="result" class="hidden">
+      <div id="brawler-list"></div>
+      <div id="brawler-count" class="text-center mt-20" style="color:#aaa"></div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    /*
+    LESSON IDEA
+    Today we learn:
+    1. What an array is (a list of things)
+    2. How to sort an array (put things in order)
+    3. How to take the first 5 items with .slice()
+    */
+
+    setupTagInput("tag-input", "load-btn", loadPlayer)
+
+    async function loadPlayer(tag) {
+      showLoading()
+
+      try {
+        const player = await fetchPlayer(tag)
+
+        // The API already gives us the top 3, but we need all brawlers
+        // So we fetch the full player data with all brawlers
+        const allBrawlers = player.brawlers
+
+        // Sort brawlers from most trophies to least trophies
+        allBrawlers.sort((a, b) => b.trophies - a.trophies)
+
+        // Take only the top 5
+        const top5 = allBrawlers.slice(0, 5)
+
+        // Medals for the top 3
+        const medals = ["🥇", "🥈", "🥉", "4 ", "5 "]
+
+        let html = `<div class="text-center mb-16">
+          <div class="text-big text-gold">${escapeHtml(player.name)}</div>
+        </div>`
+
+        top5.forEach((brawler, index) => {
+          html += `
+            <div class="brawler-row">
+              <span class="brawler-rank">${medals[index]}</span>
+              <span class="brawler-name">${escapeHtml(brawler.name)}</span>
+              <span class="brawler-trophies">${brawler.trophies.toLocaleString()} 🏆</span>
+            </div>
+          `
+        })
+
+        document.getElementById("brawler-list").innerHTML = html
+        document.getElementById("brawler-count").textContent =
+          `You own ${allBrawlers.length} brawlers!`
+
+        showResult()
+
+      } catch (err) {
+        showError("😕 " + err.message)
+      }
+    }
+  </script>
+</body>
+</html>

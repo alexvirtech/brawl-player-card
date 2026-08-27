@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Brawler — Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      <span class="site-title">⭐ BEN'S BRAWL APPS</span>
+      <a href="/" class="home-link">← Home</a>
+    </div>
+
+    <div class="app-number">Mini-App #8</div>
+    <h1>🎲 Random Brawler</h1>
+
+    <div class="tag-box">
+      <input type="text" id="tag-input" placeholder="#YOURTAG">
+      <button id="load-btn">LOAD</button>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Loading player...</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="result" class="hidden">
+      <button class="big-button" id="pick-btn">🎲 PICK A RANDOM BRAWLER!</button>
+      <div id="countdown" class="countdown hidden"></div>
+      <div id="picked" class="hidden">
+        <div class="card card-gold" id="picked-card"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    /*
+    LESSON IDEA
+    Today we learn:
+    1. What Math.random() does (random numbers!)
+    2. How to pick a random item from an array
+    3. What setTimeout does (waiting / countdown)
+    */
+
+    let allBrawlers = []
+
+    setupTagInput("tag-input", "load-btn", loadPlayer)
+
+    async function loadPlayer(tag) {
+      showLoading()
+
+      try {
+        const player = await fetchPlayer(tag)
+        allBrawlers = player.brawlers
+        document.getElementById("picked").classList.add("hidden")
+        document.getElementById("countdown").classList.add("hidden")
+        showResult()
+
+      } catch (err) {
+        showError("😕 " + err.message)
+      }
+    }
+
+    document.getElementById("pick-btn").addEventListener("click", () => {
+      if (allBrawlers.length === 0) return
+
+      const btn = document.getElementById("pick-btn")
+      const countdownEl = document.getElementById("countdown")
+      const pickedEl = document.getElementById("picked")
+
+      btn.style.display = "none"
+      pickedEl.classList.add("hidden")
+      countdownEl.classList.remove("hidden")
+
+      let count = 3
+      countdownEl.textContent = count
+
+      const timer = setInterval(() => {
+        count--
+
+        if (count > 0) {
+          countdownEl.textContent = count
+        } else {
+          clearInterval(timer)
+          countdownEl.classList.add("hidden")
+          btn.style.display = "block"
+
+          // Pick a random brawler!
+          const randomIndex = Math.floor(Math.random() * allBrawlers.length)
+          const brawler = allBrawlers[randomIndex]
+
+          document.getElementById("picked-card").innerHTML = `
+            <div class="text-center">
+              <div style="font-size:3rem; margin-bottom:8px">🎉</div>
+              <div style="font-size:1.6rem; font-weight:800; color:#ffd700; margin-bottom:12px">
+                ${escapeHtml(brawler.name)}
+              </div>
+            </div>
+
+            <div class="stat-row">
+              <span class="stat-label">🏆 Trophies</span>
+              <span class="stat-value text-gold">${brawler.trophies.toLocaleString()}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">🔥 Best</span>
+              <span class="stat-value" style="color:#ff6b35">${brawler.highestTrophies.toLocaleString()}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">💪 Power</span>
+              <span class="stat-value" style="color:#48dbfb">${brawler.power}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">⭐ Rank</span>
+              <span class="stat-value" style="color:#a29bfe">${brawler.rank}</span>
+            </div>
+
+            <div class="text-center mt-20" style="color:#aaa">
+              Go play ${escapeHtml(brawler.name)}! 🎮
+            </div>
+          `
+
+          pickedEl.classList.remove("hidden")
+        }
+      }, 800)
+    })
+  </script>
+</body>
+</html>

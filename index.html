@@ -3,39 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brawl Stars Player Card</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    .app-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .app-link {
+      display: block;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 20px 14px;
+      text-align: center;
+      text-decoration: none;
+      color: #f0f0f0;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .app-link:hover {
+      transform: scale(1.03);
+      border-color: rgba(255, 215, 0, 0.4);
+      box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
+    }
+
+    .app-link .icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .app-link .label {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .app-link .number {
+      font-size: 0.7rem;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 400px) {
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Brawl Stars Player Card</h1>
-
-    <!-- STEP 1: The player types their tag here -->
-    <div class="search-box">
-      <label for="tag-input">Enter your Player Tag:</label>
-      <input
-        type="text"
-        id="tag-input"
-        value=""
-        placeholder="#YOURTAG"
-      >
-      <button id="search-btn">Show my player card</button>
+    <div class="site-header">
+      <span class="site-title">⭐ BEN'S BRAWL APPS</span>
     </div>
 
-    <!-- Loading spinner (hidden by default) -->
-    <div id="loading" class="loading hidden">
-      <div class="spinner"></div>
-      <p>Looking up player...</p>
+    <h1>⭐ Ben's Brawl Apps</h1>
+
+    <div class="text-center mb-20" style="color:#aaa">
+      10 mini-apps to learn programming with Brawl Stars!
     </div>
 
-    <!-- Error message (hidden by default) -->
-    <div id="error" class="error hidden"></div>
+    <div class="app-grid">
+      <a href="/player-card/" class="app-link">
+        <div class="icon">🪪</div>
+        <div class="label">Player Card</div>
+        <div class="number">#1</div>
+      </a>
 
-    <!-- STEP 6: The player card appears here -->
-    <div id="player-card" class="player-card hidden"></div>
+      <a href="/trophy-meter/" class="app-link">
+        <div class="icon">🏆</div>
+        <div class="label">Trophy Meter</div>
+        <div class="number">#2</div>
+      </a>
+
+      <a href="/best-brawlers/" class="app-link">
+        <div class="icon">⭐</div>
+        <div class="label">Best Brawlers</div>
+        <div class="number">#3</div>
+      </a>
+
+      <a href="/find-brawler/" class="app-link">
+        <div class="icon">🔍</div>
+        <div class="label">Find a Brawler</div>
+        <div class="number">#4</div>
+      </a>
+
+      <a href="/champion/" class="app-link">
+        <div class="icon">👑</div>
+        <div class="label">Champion</div>
+        <div class="number">#5</div>
+      </a>
+
+      <a href="/compare-brawlers/" class="app-link">
+        <div class="icon">⚔️</div>
+        <div class="label">Compare Brawlers</div>
+        <div class="number">#6</div>
+      </a>
+
+      <a href="/compare-players/" class="app-link">
+        <div class="icon">🆚</div>
+        <div class="label">Compare Players</div>
+        <div class="number">#7</div>
+      </a>
+
+      <a href="/random-brawler/" class="app-link">
+        <div class="icon">🎲</div>
+        <div class="label">Random Brawler</div>
+        <div class="number">#8</div>
+      </a>
+
+      <a href="/todays-challenge/" class="app-link">
+        <div class="icon">🎯</div>
+        <div class="label">Today's Challenge</div>
+        <div class="number">#9</div>
+      </a>
+
+      <a href="/brawler-gallery/" class="app-link">
+        <div class="icon">🖼️</div>
+        <div class="label">Brawler Gallery</div>
+        <div class="number">#10</div>
+      </a>
+    </div>
   </div>
-
-  <script>window.API_BASE = "https://brawl-stars-proxy-eae7df075ba4.herokuapp.com"</script>
-  <script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trophy Meter — Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      <span class="site-title">⭐ BEN'S BRAWL APPS</span>
+      <a href="/" class="home-link">← Home</a>
+    </div>
+
+    <div class="app-number">Mini-App #2</div>
+    <h1>🏆 Trophy Meter</h1>
+
+    <div class="tag-box">
+      <input type="text" id="tag-input" placeholder="#YOURTAG">
+      <button id="load-btn">LOAD</button>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Loading player...</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="result" class="hidden">
+      <div class="card card-gold" id="meter-card"></div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    /*
+    LESSON IDEA
+    Today we learn:
+    1. What variables are
+    2. How to do math (arithmetic)
+    3. What a percentage is
+    4. How to make a progress bar
+    */
+
+    setupTagInput("tag-input", "load-btn", loadPlayer)
+
+    // Trophy milestones — the goals a player can aim for
+    const MILESTONES = [500, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 7500, 10000, 15000, 20000]
+
+    async function loadPlayer(tag) {
+      showLoading()
+
+      try {
+        const player = await fetchPlayer(tag)
+
+        // Find the next milestone (the first one bigger than current trophies)
+        const currentTrophies = player.trophies
+        let targetTrophies = MILESTONES[MILESTONES.length - 1]
+
+        for (let i = 0; i < MILESTONES.length; i++) {
+          if (MILESTONES[i] > currentTrophies) {
+            targetTrophies = MILESTONES[i]
+            break
+          }
+        }
+
+        // Calculate the percentage
+        const percentage = Math.round(currentTrophies / targetTrophies * 100)
+
+        // How many trophies left?
+        const remaining = targetTrophies - currentTrophies
+
+        // Cap the progress bar at 100%
+        const barWidth = Math.min(percentage, 100)
+
+        document.getElementById("meter-card").innerHTML = `
+          <div class="text-center mb-16">
+            <div class="text-big text-gold">${escapeHtml(player.name)}</div>
+          </div>
+
+          <div class="text-center mb-12">
+            <div style="font-size:2rem; font-weight:800; color:#ffd700">
+              🏆 ${currentTrophies.toLocaleString()}
+            </div>
+            <div style="color:#aaa; margin-top:4px">trophies</div>
+          </div>
+
+          <div class="text-center mb-8">
+            <div style="color:#ccc; font-weight:700">NEXT GOAL</div>
+            <div style="font-size:1.3rem; font-weight:800; color:#ff6b35">
+              ${targetTrophies.toLocaleString()} trophies
+            </div>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${barWidth}%"></div>
+          </div>
+
+          <div class="text-center mb-12" style="font-size:1.2rem; font-weight:700; color:#ffd700">
+            ${percentage}%
+          </div>
+
+          <div class="text-center" style="font-size:1.1rem; color:#ccc">
+            ${remaining.toLocaleString()} trophies to go! 💪
+          </div>
+        `
+
+        showResult()
+
+      } catch (err) {
+        showError("😕 " + err.message)
+      }
+    }
+  </script>
+</body>
+</html>

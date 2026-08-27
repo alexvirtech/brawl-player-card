@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Player Card — Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      <span class="site-title">⭐ BEN'S BRAWL APPS</span>
+      <a href="/" class="home-link">← Home</a>
+    </div>
+
+    <div class="app-number">Mini-App #1</div>
+    <h1>🪪 My Player Card</h1>
+
+    <div class="tag-box">
+      <input type="text" id="tag-input" placeholder="#YOURTAG">
+      <button id="load-btn">LOAD</button>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Loading player...</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="result" class="hidden">
+      <div class="card card-gold" id="player-card"></div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    /*
+    LESSON IDEA
+    Today we learn:
+    1. How to get data from an API
+    2. How to show data on a web page
+    3. What a Player Tag is
+    */
+
+    // Set up the tag input and load button
+    setupTagInput("tag-input", "load-btn", loadPlayer)
+
+    // When the player clicks LOAD, fetch and display the player card
+    async function loadPlayer(tag) {
+      showLoading()
+
+      try {
+        // Ask our server for the player data
+        const player = await fetchPlayer(tag)
+
+        // Build the player card
+        const clubName = player.club ? player.club.name : "No club"
+
+        const medals = ["🥇", "🥈", "🥉"]
+
+        document.getElementById("player-card").innerHTML = `
+          <div class="text-center mb-16">
+            <div class="text-big text-gold">${escapeHtml(player.name)}</div>
+            <div style="color:#888; margin-top:4px">${escapeHtml(player.tag)}</div>
+          </div>
+
+          <div class="stat-row">
+            <span class="stat-label">🏆 Trophies</span>
+            <span class="stat-value text-gold">${player.trophies.toLocaleString()}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">🔥 Highest</span>
+            <span class="stat-value" style="color:#ff6b35">${player.highestTrophies.toLocaleString()}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">⭐ Level</span>
+            <span class="stat-value" style="color:#48dbfb">${player.expLevel}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">🏠 Club</span>
+            <span class="stat-value" style="color:#a29bfe">${escapeHtml(clubName)}</span>
+          </div>
+
+          <h3 class="mt-20 mb-12" style="-webkit-text-fill-color:#ccc; font-size:1rem">Top Brawlers</h3>
+          ${player.brawlers.map((b, i) => `
+            <div class="brawler-row">
+              <span class="brawler-rank">${medals[i]}</span>
+              <span class="brawler-name">${escapeHtml(b.name)}</span>
+              <span class="brawler-trophies">${b.trophies.toLocaleString()} 🏆</span>
+            </div>
+          `).join("")}
+        `
+
+        showResult()
+
+      } catch (err) {
+        showError("😕 " + err.message)
+      }
+    }
+  </script>
+</body>
+</html>

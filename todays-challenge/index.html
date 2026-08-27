@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Today's Challenge — Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      <span class="site-title">⭐ BEN'S BRAWL APPS</span>
+      <a href="/" class="home-link">← Home</a>
+    </div>
+
+    <div class="app-number">Mini-App #9</div>
+    <h1>🎯 Today's Challenge</h1>
+
+    <div class="tag-box">
+      <input type="text" id="tag-input" placeholder="#YOURTAG">
+      <button id="load-btn">LOAD</button>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Loading player...</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="result" class="hidden">
+      <button class="big-button" id="challenge-btn">🎯 GET TODAY'S CHALLENGE!</button>
+      <div id="challenge-card-wrapper"></div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    /*
+    LESSON IDEA
+    Today we learn:
+    1. How to build random sentences from arrays of words
+    2. Template strings (`Hello ${name}!`)
+    3. Combining random choices to make something fun
+    */
+
+    let allBrawlers = []
+
+    setupTagInput("tag-input", "load-btn", loadPlayer)
+
+    const GOALS = [
+      "Win 3 games",
+      "Win 5 games",
+      "Get 10 kills",
+      "Score the most stars",
+      "Survive until the end",
+      "Win without dying",
+      "Be the MVP",
+      "Get a team wipe",
+    ]
+
+    const MODES = [
+      "Gem Grab",
+      "Showdown",
+      "Brawl Ball",
+      "Bounty",
+      "Heist",
+      "Hot Zone",
+      "Knockout",
+      "Any mode you want",
+    ]
+
+    const BONUS = [
+      "...using only your Super!",
+      "...without using gadgets!",
+      "...as the team leader!",
+      "...and don't forget to spin!",
+      "...while standing still as much as possible!",
+      "...and try to get Star Player!",
+      "...before your friend does!",
+      "",
+    ]
+
+    async function loadPlayer(tag) {
+      showLoading()
+
+      try {
+        const player = await fetchPlayer(tag)
+        allBrawlers = player.brawlers
+        document.getElementById("challenge-card-wrapper").innerHTML = ""
+        showResult()
+
+      } catch (err) {
+        showError("😕 " + err.message)
+      }
+    }
+
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)]
+    }
+
+    document.getElementById("challenge-btn").addEventListener("click", () => {
+      if (allBrawlers.length === 0) return
+
+      const brawler = pickRandom(allBrawlers)
+      const goal = pickRandom(GOALS)
+      const mode = pickRandom(MODES)
+      const bonus = pickRandom(BONUS)
+
+      document.getElementById("challenge-card-wrapper").innerHTML = `
+        <div class="card card-gold mt-20">
+          <div class="text-center mb-16">
+            <div style="font-size:2.5rem">🎯</div>
+            <div style="font-size:1rem; color:#aaa; margin-top:4px">YOUR CHALLENGE</div>
+          </div>
+
+          <div class="stat-row">
+            <span class="stat-label">👊 Brawler</span>
+            <span class="stat-value text-gold">${escapeHtml(brawler.name)}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">🗺️ Mode</span>
+            <span class="stat-value" style="color:#48dbfb">${escapeHtml(mode)}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">🎯 Goal</span>
+            <span class="stat-value" style="color:#ff6b35">${escapeHtml(goal)}</span>
+          </div>
+
+          ${bonus ? `
+            <div class="text-center mt-20" style="color:#a29bfe; font-size:1.1rem; font-weight:700">
+              ${escapeHtml(bonus)}
+            </div>
+          ` : ""}
+
+          <div class="text-center mt-20" style="color:#aaa; font-size:0.85rem">
+            ${escapeHtml(brawler.name)} has ${brawler.trophies.toLocaleString()} 🏆 and Power ${brawler.power}
+          </div>
+        </div>
+      `
+    })
+  </script>
+</body>
+</html>

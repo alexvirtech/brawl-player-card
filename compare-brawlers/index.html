@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compare Brawlers — Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      <span class="site-title">⭐ BEN'S BRAWL APPS</span>
+      <a href="/" class="home-link">← Home</a>
+    </div>
+
+    <div class="app-number">Mini-App #6</div>
+    <h1>⚔️ Compare Brawlers</h1>
+
+    <div class="tag-box">
+      <input type="text" id="tag-input" placeholder="#YOURTAG">
+      <button id="load-btn">LOAD</button>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Loading player...</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="result" class="hidden">
+      <div style="display:flex; gap:10px; margin-bottom:16px">
+        <select id="brawler-a"></select>
+        <select id="brawler-b"></select>
+      </div>
+      <button class="big-button" id="compare-btn">COMPARE!</button>
+      <div id="comparison"></div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    /*
+    LESSON IDEA
+    Today we learn:
+    1. How to use dropdown menus (<select>)
+    2. How to compare two objects
+    3. if / else — who wins?
+    */
+
+    let brawlerMap = {}
+
+    setupTagInput("tag-input", "load-btn", loadPlayer)
+
+    async function loadPlayer(tag) {
+      showLoading()
+
+      try {
+        const player = await fetchPlayer(tag)
+        const brawlers = player.brawlers
+
+        brawlerMap = {}
+        brawlers.forEach(b => {
+          brawlerMap[b.name] = b
+        })
+
+        const selectA = document.getElementById("brawler-a")
+        const selectB = document.getElementById("brawler-b")
+
+        let options = ""
+        brawlers.forEach(b => {
+          options += `<option value="${escapeHtml(b.name)}">${escapeHtml(b.name)}</option>`
+        })
+
+        selectA.innerHTML = options
+        selectB.innerHTML = options
+
+        if (brawlers.length > 1) {
+          selectB.selectedIndex = 1
+        }
+
+        document.getElementById("comparison").innerHTML = ""
+        showResult()
+
+      } catch (err) {
+        showError("😕 " + err.message)
+      }
+    }
+
+    document.getElementById("compare-btn").addEventListener("click", () => {
+      const nameA = document.getElementById("brawler-a").value
+      const nameB = document.getElementById("brawler-b").value
+
+      if (nameA === nameB) {
+        document.getElementById("comparison").innerHTML = `
+          <div class="text-center mt-20" style="color:#ff6b8a; font-size:1.1rem">
+            Pick two different brawlers!
+          </div>
+        `
+        return
+      }
+
+      const a = brawlerMap[nameA]
+      const b = brawlerMap[nameB]
+
+      function compareRow(label, valA, valB) {
+        const winA = valA > valB
+        const winB = valB > valA
+        const colorA = winA ? "#ffd700" : "#aaa"
+        const colorB = winB ? "#ffd700" : "#aaa"
+        return `
+          <div class="stat-row">
+            <span style="color:${colorA}; font-weight:700; min-width:60px">${valA}</span>
+            <span class="stat-label" style="text-align:center; flex:1">${label}</span>
+            <span style="color:${colorB}; font-weight:700; min-width:60px; text-align:right">${valB}</span>
+          </div>
+        `
+      }
+
+      // Count wins
+      let winsA = 0
+      let winsB = 0
+
+      if (a.trophies > b.trophies) winsA++
+      else if (b.trophies > a.trophies) winsB++
+
+      if (a.highestTrophies > b.highestTrophies) winsA++
+      else if (b.highestTrophies > a.highestTrophies) winsB++
+
+      if (a.power > b.power) winsA++
+      else if (b.power > a.power) winsB++
+
+      if (a.rank > b.rank) winsA++
+      else if (b.rank > a.rank) winsB++
+
+      let winnerText = "It's a tie! 🤝"
+      if (winsA > winsB) winnerText = `${escapeHtml(a.name)} wins! 🎉`
+      if (winsB > winsA) winnerText = `${escapeHtml(b.name)} wins! 🎉`
+
+      document.getElementById("comparison").innerHTML = `
+        <div class="card card-gold mt-20">
+          <div class="vs-container">
+            <div class="vs-player">
+              <div class="name" style="color:#48dbfb">${escapeHtml(a.name)}</div>
+            </div>
+            <div class="vs-text">VS</div>
+            <div class="vs-player">
+              <div class="name" style="color:#ff6b35">${escapeHtml(b.name)}</div>
+            </div>
+          </div>
+
+          ${compareRow("🏆 Trophies", a.trophies, b.trophies)}
+          ${compareRow("🔥 Best", a.highestTrophies, b.highestTrophies)}
+          ${compareRow("💪 Power", a.power, b.power)}
+          ${compareRow("⭐ Rank", a.rank, b.rank)}
+
+          <div class="winner-text mt-20">${winnerText}</div>
+          <div class="text-center mt-12" style="color:#aaa">
+            Score: ${winsA} – ${winsB}
+          </div>
+        </div>
+      `
+    })
+  </script>
+</body>
+</html>

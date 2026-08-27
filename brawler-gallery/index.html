@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brawler Gallery — Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+  <div class="container" style="max-width:640px">
+    <div class="site-header">
+      <span class="site-title">⭐ BEN'S BRAWL APPS</span>
+      <a href="/" class="home-link">← Home</a>
+    </div>
+
+    <div class="app-number">Mini-App #10</div>
+    <h1>🖼️ Brawler Gallery</h1>
+
+    <div class="tag-box">
+      <input type="text" id="tag-input" placeholder="#YOURTAG">
+      <button id="load-btn">LOAD</button>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Loading player...</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="result" class="hidden">
+      <div class="sort-buttons" id="sort-bar">
+        <button class="sort-btn active" data-sort="trophies">🏆 Trophies</button>
+        <button class="sort-btn" data-sort="power">💪 Power</button>
+        <button class="sort-btn" data-sort="name">🔤 Name</button>
+        <button class="sort-btn" data-sort="rank">⭐ Rank</button>
+      </div>
+      <div id="gallery-count" class="text-center mb-16" style="color:#aaa"></div>
+      <div class="brawler-grid" id="gallery"></div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    /*
+    LESSON IDEA
+    Today we learn:
+    1. CSS Grid — how to make a responsive grid layout
+    2. Sorting in different ways (by name, by number)
+    3. How websites rearrange content without reloading
+    */
+
+    let allBrawlers = []
+    let currentSort = "trophies"
+
+    setupTagInput("tag-input", "load-btn", loadPlayer)
+
+    async function loadPlayer(tag) {
+      showLoading()
+
+      try {
+        const player = await fetchPlayer(tag)
+        allBrawlers = player.brawlers
+
+        document.getElementById("gallery-count").textContent =
+          `${escapeHtml(player.name)} — ${allBrawlers.length} brawlers`
+
+        sortAndRender()
+        showResult()
+
+      } catch (err) {
+        showError("😕 " + err.message)
+      }
+    }
+
+    function sortAndRender() {
+      const sorted = [...allBrawlers]
+
+      if (currentSort === "trophies") {
+        sorted.sort((a, b) => b.trophies - a.trophies)
+      } else if (currentSort === "power") {
+        sorted.sort((a, b) => b.power - a.power)
+      } else if (currentSort === "name") {
+        sorted.sort((a, b) => a.name.localeCompare(b.name))
+      } else if (currentSort === "rank") {
+        sorted.sort((a, b) => b.rank - a.rank)
+      }
+
+      let html = ""
+      sorted.forEach(b => {
+        html += `
+          <div class="grid-card">
+            <div class="name">${escapeHtml(b.name)}</div>
+            <div class="trophies">${b.trophies.toLocaleString()} 🏆</div>
+            <div class="power">PWR ${b.power} · Rank ${b.rank}</div>
+          </div>
+        `
+      })
+
+      document.getElementById("gallery").innerHTML = html
+    }
+
+    // Sort buttons
+    document.getElementById("sort-bar").addEventListener("click", (e) => {
+      const btn = e.target.closest(".sort-btn")
+      if (!btn) return
+
+      currentSort = btn.dataset.sort
+
+      document.querySelectorAll(".sort-btn").forEach(b => b.classList.remove("active"))
+      btn.classList.add("active")
+
+      sortAndRender()
+    })
+  </script>
+</body>
+</html>

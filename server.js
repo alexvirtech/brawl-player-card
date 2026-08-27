@@ -69,8 +69,13 @@ app.get("/api/player", async (req, res) => {
       club: raw.club ? { name: raw.club.name } : null,
       brawlers: (raw.brawlers || [])
         .sort((a, b) => b.trophies - a.trophies)
-        .slice(0, 3)
-        .map(b => ({ name: b.name, trophies: b.trophies })),
+        .map(b => ({
+          name: b.name,
+          trophies: b.trophies,
+          highestTrophies: b.highestTrophies,
+          power: b.power,
+          rank: b.rank,
+        })),
     }
 
     return res.json(player)

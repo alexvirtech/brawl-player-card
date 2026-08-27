@@ -3,3 +3,5 @@ node_modules/
 .vercel
 proxy/node_modules/
 proxy/.env
+
+.vercel

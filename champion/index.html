@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Champion Brawler — Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      <span class="site-title">⭐ BEN'S BRAWL APPS</span>
+      <a href="/" class="home-link">← Home</a>
+    </div>
+
+    <div class="app-number">Mini-App #5</div>
+    <h1>👑 Champion Brawler</h1>
+
+    <div class="tag-box">
+      <input type="text" id="tag-input" placeholder="#YOURTAG">
+      <button id="load-btn">LOAD</button>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Loading player...</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="result" class="hidden">
+      <div class="card card-gold" id="champion-card"></div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    /*
+    LESSON IDEA
+    Today we learn:
+    1. How to find the biggest value in an array
+    2. What Math.max does (and why we can't use it directly on objects)
+    3. How .reduce() works — step by step
+    */
+
+    setupTagInput("tag-input", "load-btn", loadPlayer)
+
+    async function loadPlayer(tag) {
+      showLoading()
+
+      try {
+        const player = await fetchPlayer(tag)
+        const brawlers = player.brawlers
+
+        if (brawlers.length === 0) {
+          showError("😕 No brawlers found!")
+          return
+        }
+
+        // Find the brawler with the most trophies
+        let champion = brawlers[0]
+        for (let i = 1; i < brawlers.length; i++) {
+          if (brawlers[i].trophies > champion.trophies) {
+            champion = brawlers[i]
+          }
+        }
+
+        // Find the brawler with the highest power level
+        let strongest = brawlers[0]
+        for (let i = 1; i < brawlers.length; i++) {
+          if (brawlers[i].power > strongest.power) {
+            strongest = brawlers[i]
+          }
+        }
+
+        // Find the brawler with the highest all-time trophies
+        let allTimeBest = brawlers[0]
+        for (let i = 1; i < brawlers.length; i++) {
+          if (brawlers[i].highestTrophies > allTimeBest.highestTrophies) {
+            allTimeBest = brawlers[i]
+          }
+        }
+
+        document.getElementById("champion-card").innerHTML = `
+          <div class="text-center mb-16">
+            <div class="text-big text-gold">${escapeHtml(player.name)}'s Champions</div>
+          </div>
+
+          <div class="text-center mb-20">
+            <div style="font-size:3rem">👑</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#ffd700; margin:8px 0">
+              ${escapeHtml(champion.name)}
+            </div>
+            <div style="color:#ccc">Most trophies right now</div>
+            <div style="font-size:1.3rem; font-weight:800; color:#ffd700; margin-top:4px">
+              ${champion.trophies.toLocaleString()} 🏆
+            </div>
+          </div>
+
+          <div class="stat-row">
+            <span class="stat-label">💪 Strongest (Power)</span>
+            <span class="stat-value" style="color:#48dbfb">
+              ${escapeHtml(strongest.name)} — PWR ${strongest.power}
+            </span>
+          </div>
+
+          <div class="stat-row">
+            <span class="stat-label">🔥 All-Time Best</span>
+            <span class="stat-value" style="color:#ff6b35">
+              ${escapeHtml(allTimeBest.name)} — ${allTimeBest.highestTrophies.toLocaleString()} 🏆
+            </span>
+          </div>
+
+          <div class="text-center mt-20" style="color:#aaa">
+            Out of ${brawlers.length} brawlers
+          </div>
+        `
+
+        showResult()
+
+      } catch (err) {
+        showError("😕 " + err.message)
+      }
+    }
+  </script>
+</body>
+</html>
