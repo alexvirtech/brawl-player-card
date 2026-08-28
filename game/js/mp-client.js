@@ -1,6 +1,6 @@
 const MP_SERVER = window.location.hostname === 'localhost'
   ? 'http://localhost:3001'
-  : 'https://ben-battle-mp-b0c1a7d8f35e.herokuapp.com'
+  : 'https://ben-battle-mp-4cbd83be597e.herokuapp.com'
 
 const PLAYER_COLORS = [
   { fill: '#4488ff', outline: '#2266cc', bullet: '#44ddff', name: 'Blue' },
