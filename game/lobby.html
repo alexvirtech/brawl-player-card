@@ -224,20 +224,28 @@
     }
 
     .menu-account-btn {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
       width: 100%;
       padding: 14px;
       margin-top: 12px;
-      border: 2px solid rgba(255,255,255,0.12);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.06);
-      color: #ccc;
-      font-size: 1rem;
-      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,107,53,.08));
+      color: #ffd700;
+      font-size: .95rem;
+      font-weight: 800;
       cursor: pointer;
       text-align: center;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      box-shadow: 0 0 0 1.5px rgba(255,215,0,.2) inset;
+      transition: transform .15s, box-shadow .15s;
     }
-    .menu-account-btn:hover { border-color: #ffd700; color: #ffd700; }
+    .menu-account-btn:hover { transform: scale(1.02); box-shadow: 0 0 0 1.5px rgba(255,215,0,.45) inset, 0 4px 16px rgba(255,215,0,.15); }
+    .menu-account-btn:active { transform: scale(.97); }
 
     /* === Game canvas === */
     #mp-game-wrapper {
@@ -424,7 +432,7 @@
              placeholder="Enter code" maxlength="6" inputmode="numeric" autocomplete="off">
       <button id="join-btn" class="big-button" style="background:linear-gradient(135deg,#44ddff,#4488ff)">JOIN GAME</button>
       <div id="menu-error" class="status-msg error" style="display:none"></div>
-      <button class="menu-account-btn" onclick="openAccountModal()">MY ACCOUNT</button>
+      <button class="menu-account-btn" onclick="openAccountModal()"><span style="font-size:1.1rem">&#x1F464;</span> MY ACCOUNT</button>
     </div>
   </div>
 
@@ -513,7 +521,7 @@
         </table>
       </div>
       <button class="big-button" onclick="window.location.href='/game/lobby.html'">PLAY AGAIN</button>
-      <button class="menu-account-btn" onclick="openAccountModal()">MY ACCOUNT</button>
+      <button class="menu-account-btn" onclick="openAccountModal()"><span style="font-size:1.1rem">&#x1F464;</span> MY ACCOUNT</button>
       <div style="text-align:center; margin-top:8px">
         <a href="/game/" style="color:#888; font-size:0.85rem; text-decoration:none">Back to Game Menu</a>
       </div>
