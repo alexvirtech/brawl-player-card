@@ -40,8 +40,8 @@
       '.hist-loss{color:#888;font-weight:800;min-width:32px}' +
       '.hist-info{flex:1;color:#888;font-size:.75rem}' +
       '.hist-pts{font-weight:800}' +
-      '.acct-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px 7px 10px;border:none;border-radius:20px;background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,107,53,.12));color:#ffd700;font-size:.8rem;font-weight:800;cursor:pointer;text-decoration:none;letter-spacing:.5px;transition:transform .15s,box-shadow .15s;text-transform:uppercase;box-shadow:0 0 0 1.5px rgba(255,215,0,.25) inset}' +
-      '.acct-btn:hover{transform:scale(1.05);box-shadow:0 0 0 1.5px rgba(255,215,0,.5) inset,0 4px 16px rgba(255,215,0,.2)}' +
+      '.acct-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px 7px 10px;border:none;border-radius:20px;background:rgba(255,255,255,.08);color:#ffd700;font-size:.8rem;font-weight:800;cursor:pointer;text-decoration:none;letter-spacing:.5px;transition:transform .15s,background .15s;text-transform:uppercase;outline:none}' +
+      '.acct-btn:hover{transform:scale(1.05);background:rgba(255,215,0,.15)}' +
       '.acct-btn:active{transform:scale(.95)}' +
       '.acct-btn .acct-icon{font-size:1rem;line-height:1}'
     document.head.appendChild(style)

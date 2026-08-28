@@ -233,7 +233,7 @@
       margin-top: 12px;
       border: none;
       border-radius: 14px;
-      background: linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,107,53,.08));
+      background: rgba(255,255,255,.06);
       color: #ffd700;
       font-size: .95rem;
       font-weight: 800;
@@ -241,10 +241,10 @@
       text-align: center;
       letter-spacing: .5px;
       text-transform: uppercase;
-      box-shadow: 0 0 0 1.5px rgba(255,215,0,.2) inset;
-      transition: transform .15s, box-shadow .15s;
+      outline: none;
+      transition: transform .15s, background .15s;
     }
-    .menu-account-btn:hover { transform: scale(1.02); box-shadow: 0 0 0 1.5px rgba(255,215,0,.45) inset, 0 4px 16px rgba(255,215,0,.15); }
+    .menu-account-btn:hover { transform: scale(1.02); background: rgba(255,215,0,.12); }
     .menu-account-btn:active { transform: scale(.97); }
 
     /* === Game canvas === */
