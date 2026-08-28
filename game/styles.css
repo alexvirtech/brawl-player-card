@@ -64,22 +64,28 @@ body {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, #ffd700, #ff6b35);
   border: none;
-  border-radius: 8px;
-  color: #ccc;
-  padding: 8px 14px;
+  border-radius: 10px;
+  color: #1a1a2e;
+  padding: 8px 16px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   z-index: 10;
   outline: none;
-  transition: background 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 #sound-btn:hover {
-  background: rgba(255, 215, 0, 0.15);
-  color: #ffd700;
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.35);
+}
+
+#sound-btn:active {
+  transform: scale(0.96);
 }
 
 /* === Account Button (game page) === */
@@ -87,25 +93,31 @@ body {
   position: absolute;
   top: 10px;
   right: 110px;
-  background: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, #ffd700, #ff6b35);
   border: none;
-  border-radius: 8px;
-  color: #ccc;
-  padding: 8px 14px;
+  border-radius: 10px;
+  color: #1a1a2e;
+  padding: 8px 16px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   z-index: 10;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   outline: none;
-  transition: background 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 #acct-link:hover {
-  background: rgba(255, 215, 0, 0.15);
-  color: #ffd700;
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.35);
+}
+
+#acct-link:active {
+  transform: scale(0.96);
 }
 
 /* === Home Link === */
