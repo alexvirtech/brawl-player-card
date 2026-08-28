@@ -192,4 +192,6 @@
     var modal = document.getElementById('account-modal')
     if (modal) modal.style.display = 'none'
   }
+
+  ensureStyles()
 })()
