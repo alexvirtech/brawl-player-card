@@ -34,6 +34,18 @@ export function createRoutes(prisma, roomManager) {
     })
   })
 
+  router.patch('/api/players/me', auth, async (req, res) => {
+    const { nickname } = req.body
+    if (!nickname || nickname.trim().length < 1 || nickname.trim().length > 20) {
+      return res.status(400).json({ error: 'Nickname must be 1-20 characters' })
+    }
+    const updated = await prisma.player.update({
+      where: { id: req.player.id },
+      data: { nickname: nickname.trim() },
+    })
+    res.json({ id: updated.id, nickname: updated.nickname })
+  })
+
   router.get('/api/players/me', auth, async (req, res) => {
     const stats = await prisma.gamePlayer.aggregate({
       where: { playerId: req.player.id },

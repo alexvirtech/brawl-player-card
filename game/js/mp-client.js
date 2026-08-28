@@ -416,6 +416,7 @@ function connectSocketInternal() {
     mp.notifications = []
     showScreen('game')
     initGameCanvas()
+    showControlsHint()
   })
 
   mp.socket.on('snapshot', (snapshot) => {
@@ -1076,58 +1077,20 @@ function playSound(type) {
   } catch (e) {}
 }
 
-// --- Account Modal ---
+// --- Controls Hint ---
 
-function openAccountModal() {
-  const modal = document.getElementById('account-modal')
-  const content = document.getElementById('account-content')
-  modal.style.display = 'flex'
-  content.innerHTML = '<div style="text-align:center;padding:30px"><div class="spinner"></div><p>Loading...</p></div>'
-
-  if (!mp.token) {
-    content.innerHTML = '<p style="text-align:center;color:#888;padding:30px">No profile yet. Play a game first!</p>'
-    return
-  }
-
-  const headers = { 'Authorization': 'Bearer ' + mp.token, 'Content-Type': 'application/json' }
-  Promise.all([
-    fetch(MP_SERVER + '/api/players/me', { headers }).then(r => r.json()),
-    fetch(MP_SERVER + '/api/players/me/history', { headers }).then(r => r.json()),
-  ]).then(([profile, history]) => {
-    const historyHtml = history.length === 0
-      ? '<p style="color:#666;text-align:center;padding:12px">No games played yet</p>'
-      : history.slice(0, 10).map(g => {
-          const won = g.myPlacement === 1
-          const date = new Date(g.createdAt).toLocaleDateString()
-          return `<div class="hist-row">
-            <span class="${won ? 'hist-win' : 'hist-loss'}">${won ? 'WIN' : '#' + g.myPlacement}</span>
-            <span class="hist-info">${date} &middot; ${g.players.length}p &middot; ${g.myKills}K/${g.myDeaths}D</span>
-            <span class="hist-pts">${g.myScore}pts</span>
-          </div>`
-        }).join('')
-
-    content.innerHTML = `
-      <div class="acct-header">
-        <div class="acct-avatar">&#x1F3AE;</div>
-        <div class="acct-name">${escapeHtml(profile.nickname)}</div>
-        <div class="acct-since">Since ${new Date(profile.createdAt).toLocaleDateString()}</div>
-      </div>
-      <div class="acct-grid">
-        <div class="acct-stat"><span class="acct-val">${profile.stats.wins}</span><span class="acct-lbl">Wins</span></div>
-        <div class="acct-stat"><span class="acct-val">${profile.stats.gamesPlayed}</span><span class="acct-lbl">Games</span></div>
-        <div class="acct-stat"><span class="acct-val">${profile.stats.totalKills}</span><span class="acct-lbl">Kills</span></div>
-        <div class="acct-stat"><span class="acct-val">${profile.stats.totalDeaths}</span><span class="acct-lbl">Deaths</span></div>
-      </div>
-      <h3 style="margin:16px 0 8px;font-size:0.9rem;color:#aaa">Recent Games</h3>
-      ${historyHtml}
-    `
-  }).catch(() => {
-    content.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:30px">Failed to load profile</p>'
-  })
-}
-
-function closeAccountModal() {
-  document.getElementById('account-modal').style.display = 'none'
+function showControlsHint() {
+  const hint = document.getElementById('controls-hint')
+  if (!hint) return
+  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+  const moveEl = hint.querySelector('.hint-move')
+  const shootEl = hint.querySelector('.hint-shoot')
+  if (moveEl) moveEl.textContent = isTouch ? 'DRAG to MOVE' : 'WASD to MOVE'
+  if (shootEl) shootEl.textContent = isTouch ? 'TAP to SHOOT' : 'CLICK to SHOOT'
+  hint.style.display = 'flex'
+  hint.style.opacity = '1'
+  setTimeout(() => { hint.style.opacity = '0' }, 3000)
+  setTimeout(() => { hint.style.display = 'none' }, 3500)
 }
 
 // --- Utility ---
