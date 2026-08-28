@@ -80,57 +80,126 @@ const Player = {
 
   draw(ctx) {
     if (!this.alive) return
-
     const cfg = GAME_CONFIG.player
     const s = cfg.size
 
-    ctx.fillStyle = this.hitFlash > 0 ? '#ffffff' : cfg.color
+    ctx.fillStyle = 'rgba(0,0,0,0.18)'
+    ctx.beginPath()
+    ctx.ellipse(this.x, this.y + s * 0.85, s * 0.7, s * 0.25, 0, 0, Math.PI * 2)
+    ctx.fill()
+
+    const grad = ctx.createRadialGradient(this.x - s * 0.3, this.y - s * 0.3, s * 0.05, this.x, this.y, s)
+    grad.addColorStop(0, '#99ddff')
+    grad.addColorStop(0.5, '#4499ff')
+    grad.addColorStop(1, '#2255bb')
+    ctx.fillStyle = this.hitFlash > 0 ? '#ffffff' : grad
     ctx.beginPath()
     ctx.arc(this.x, this.y, s, 0, Math.PI * 2)
     ctx.fill()
-    ctx.strokeStyle = cfg.outlineColor
-    ctx.lineWidth = 2
+    ctx.strokeStyle = '#1a1a2e'
+    ctx.lineWidth = 3.5
     ctx.stroke()
 
+    ctx.fillStyle = 'rgba(255,255,255,0.18)'
+    ctx.beginPath()
+    ctx.ellipse(this.x - s * 0.2, this.y - s * 0.35, s * 0.3, s * 0.15, -0.5, 0, Math.PI * 2)
+    ctx.fill()
+
     this._drawFace(ctx, this.x, this.y, s, this.angle)
-    this._drawHealthBar(ctx, this.x, this.y - s - 12)
+    this._drawHealthBar(ctx, this.x, this.y - s - 16)
   },
 
   _drawFace(ctx, x, y, size, angle) {
-    const eyeDist = size * 0.35
-    const eyeSize = size * 0.28
-    const pupilSize = size * 0.14
+    const eyeDist = size * 0.38
+    const eyeSize = size * 0.34
+    const irisSize = size * 0.2
+    const pupilSize = size * 0.1
 
-    const angles = [angle - 0.4, angle + 0.4]
-    angles.forEach(a => {
+    const eyeAngles = [angle - 0.42, angle + 0.42]
+    eyeAngles.forEach(a => {
       const ex = x + Math.cos(a) * eyeDist
       const ey = y + Math.sin(a) * eyeDist
+
       ctx.fillStyle = '#ffffff'
       ctx.beginPath()
       ctx.arc(ex, ey, eyeSize, 0, Math.PI * 2)
       ctx.fill()
+      ctx.strokeStyle = '#1a1a2e'
+      ctx.lineWidth = 1.5
+      ctx.stroke()
 
-      const px = ex + Math.cos(angle) * (eyeSize * 0.3)
-      const py = ey + Math.sin(angle) * (eyeSize * 0.3)
+      const ix = ex + Math.cos(angle) * eyeSize * 0.28
+      const iy = ey + Math.sin(angle) * eyeSize * 0.28
+      const iGrad = ctx.createRadialGradient(ix, iy, irisSize * 0.15, ix, iy, irisSize)
+      iGrad.addColorStop(0, '#55aaff')
+      iGrad.addColorStop(1, '#2255cc')
+      ctx.fillStyle = iGrad
+      ctx.beginPath()
+      ctx.arc(ix, iy, irisSize, 0, Math.PI * 2)
+      ctx.fill()
+
+      const px = ex + Math.cos(angle) * eyeSize * 0.35
+      const py = ey + Math.sin(angle) * eyeSize * 0.35
       ctx.fillStyle = '#111111'
       ctx.beginPath()
       ctx.arc(px, py, pupilSize, 0, Math.PI * 2)
       ctx.fill()
+
+      ctx.fillStyle = '#ffffff'
+      ctx.beginPath()
+      ctx.arc(ix - size * 0.08, iy - size * 0.08, size * 0.055, 0, Math.PI * 2)
+      ctx.fill()
     })
+
+    const mouthDist = size * 0.52
+    const mx = x + Math.cos(angle) * mouthDist
+    const my = y + Math.sin(angle) * mouthDist
+    const perp = angle + Math.PI / 2
+    const mw = size * 0.18
+    ctx.strokeStyle = '#1a1a2e'
+    ctx.lineWidth = 2
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.moveTo(mx + Math.cos(perp) * mw, my + Math.sin(perp) * mw)
+    ctx.quadraticCurveTo(
+      mx + Math.cos(angle) * size * 0.1,
+      my + Math.sin(angle) * size * 0.1,
+      mx - Math.cos(perp) * mw,
+      my - Math.sin(perp) * mw
+    )
+    ctx.stroke()
+    ctx.lineCap = 'butt'
   },
 
   _drawHealthBar(ctx, cx, cy) {
     const w = 56
-    const h = 6
+    const h = 7
     const ratio = this.health / this.maxHealth
     const x = cx - w / 2
 
-    ctx.fillStyle = '#333333'
+    ctx.fillStyle = 'rgba(0,0,0,0.4)'
+    ctx.fillRect(x - 1, cy - 1, w + 2, h + 2)
+    ctx.fillStyle = '#2a2a2a'
     ctx.fillRect(x, cy, w, h)
-    ctx.fillStyle = ratio > 0.5 ? '#44dd44' : ratio > 0.25 ? '#dddd44' : '#dd4444'
-    ctx.fillRect(x, cy, w * ratio, h)
+
+    if (ratio > 0) {
+      const hGrad = ctx.createLinearGradient(x, cy, x, cy + h)
+      if (ratio > 0.5) {
+        hGrad.addColorStop(0, '#66ff66')
+        hGrad.addColorStop(1, '#33bb33')
+      } else if (ratio > 0.25) {
+        hGrad.addColorStop(0, '#ffff44')
+        hGrad.addColorStop(1, '#ccaa22')
+      } else {
+        hGrad.addColorStop(0, '#ff5555')
+        hGrad.addColorStop(1, '#cc2222')
+      }
+      ctx.fillStyle = hGrad
+      ctx.fillRect(x, cy, w * ratio, h)
+    }
+
     ctx.strokeStyle = '#111111'
-    ctx.lineWidth = 1
+    ctx.lineWidth = 1.5
     ctx.strokeRect(x, cy, w, h)
   },
 }
