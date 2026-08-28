@@ -143,6 +143,22 @@ export function setupSocket(io, prisma, roomManager) {
       room.finishGame()
     })
 
+    socket.on('nickname-change', ({ nickname: newName }) => {
+      if (!newName || typeof newName !== 'string') return
+      const trimmed = newName.trim()
+      if (trimmed.length < 1 || trimmed.length > 20) return
+      socket.player.nickname = trimmed
+      const room = roomManager.getRoomForPlayer(playerId)
+      if (!room) return
+      const slot = room.slots.find(s => s.playerId === playerId)
+      if (slot) slot.nickname = trimmed
+      if (room.world) {
+        const wp = room.world.players.get(playerId)
+        if (wp) wp.nickname = trimmed
+      }
+      io.to(room.socketRoom).emit('nickname-updated', { playerId, nickname: trimmed })
+    })
+
     socket.on('leave-game', ({ code }) => {
       const room = roomManager.getRoom(code)
       if (!room) return

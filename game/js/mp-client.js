@@ -42,7 +42,7 @@ let mp = {
   ctx: null,
   keys: {},
   mouse: { x: 480, y: 320, down: false },
-  touch: { moveId: null, moveStartX: 0, moveStartY: 0, moveDx: 0, moveDy: 0, shootId: null, shootX: 0, shootY: 0, shooting: false },
+  touch: { moveId: null, moveStartX: 0, moveStartY: 0, moveDx: 0, moveDy: 0, isDragging: false, shootId: null, shootX: 0, shootY: 0, shooting: false },
   joystick: { visible: false, baseX: 0, baseY: 0, stickX: 0, stickY: 0 },
   animFrame: null,
   inputInterval: null,
@@ -442,6 +442,23 @@ function connectSocketInternal() {
   mp.socket.on('player-disconnected', ({ playerId }) => {
     const p = mp.snapshot?.players.find(pl => pl.id === playerId)
     if (p) addNotification(p.nickname + ' disconnected')
+  })
+
+  mp.socket.on('nickname-updated', ({ playerId: pid, nickname: newName }) => {
+    if (mp.snapshot) {
+      const p = mp.snapshot.players.find(pl => pl.id === pid)
+      if (p) p.nickname = newName
+    }
+    if (mp.prevSnapshot) {
+      const p = mp.prevSnapshot.players.find(pl => pl.id === pid)
+      if (p) p.nickname = newName
+    }
+    const slot = mp.players.find(s => s.playerId === pid)
+    if (slot) slot.nickname = newName
+    if (pid === mp.myId) {
+      mp.nickname = newName
+      localStorage.setItem('mp-nickname', newName)
+    }
   })
 
   mp.socket.on('error-msg', ({ message }) => {
@@ -913,17 +930,13 @@ function setupMPInput(canvas) {
     resumeAudio()
     for (const t of e.changedTouches) {
       const p = touchPos(t, canvas)
-      if (p.x < canvas.width / 2) {
+      if (mp.touch.moveId === null) {
         mp.touch.moveId = t.identifier
         mp.touch.moveStartX = p.x
         mp.touch.moveStartY = p.y
         mp.touch.moveDx = 0
         mp.touch.moveDy = 0
-        mp.joystick.visible = true
-        mp.joystick.baseX = p.x
-        mp.joystick.baseY = p.y
-        mp.joystick.stickX = p.x
-        mp.joystick.stickY = p.y
+        mp.touch.isDragging = false
       } else {
         mp.touch.shootId = t.identifier
         mp.touch.shootX = p.x
@@ -941,8 +954,14 @@ function setupMPInput(canvas) {
         const dx = p.x - mp.touch.moveStartX
         const dy = p.y - mp.touch.moveStartY
         const dist = Math.sqrt(dx * dx + dy * dy)
-        const maxDist = 50
-        if (dist > 0) {
+        if (dist > 12 && !mp.touch.isDragging) {
+          mp.touch.isDragging = true
+          mp.joystick.visible = true
+          mp.joystick.baseX = mp.touch.moveStartX
+          mp.joystick.baseY = mp.touch.moveStartY
+        }
+        if (mp.touch.isDragging && dist > 0) {
+          const maxDist = 50
           const clamped = Math.min(dist, maxDist)
           mp.touch.moveDx = (dx / dist) * (clamped / maxDist)
           mp.touch.moveDy = (dy / dist) * (clamped / maxDist)
@@ -961,9 +980,17 @@ function setupMPInput(canvas) {
     e.preventDefault()
     for (const t of e.changedTouches) {
       if (t.identifier === mp.touch.moveId) {
+        if (!mp.touch.isDragging) {
+          const p = touchPos(t, canvas)
+          mp.touch.shootX = p.x
+          mp.touch.shootY = p.y
+          mp.touch.shooting = true
+          setTimeout(() => { mp.touch.shooting = false }, 150)
+        }
         mp.touch.moveId = null
         mp.touch.moveDx = 0
         mp.touch.moveDy = 0
+        mp.touch.isDragging = false
         mp.joystick.visible = false
       }
       if (t.identifier === mp.touch.shootId) {
@@ -977,6 +1004,7 @@ function setupMPInput(canvas) {
     mp.touch.moveId = null
     mp.touch.moveDx = 0
     mp.touch.moveDy = 0
+    mp.touch.isDragging = false
     mp.touch.shootId = null
     mp.touch.shooting = false
     mp.joystick.visible = false
@@ -1085,8 +1113,8 @@ function showControlsHint() {
   const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
   const moveEl = hint.querySelector('.hint-move')
   const shootEl = hint.querySelector('.hint-shoot')
-  if (moveEl) moveEl.textContent = isTouch ? 'DRAG to MOVE' : 'WASD to MOVE'
-  if (shootEl) shootEl.textContent = isTouch ? 'TAP to SHOOT' : 'CLICK to SHOOT'
+  if (moveEl) moveEl.textContent = isTouch ? 'DRAG anywhere to MOVE' : 'WASD to MOVE'
+  if (shootEl) shootEl.textContent = isTouch ? 'TAP a target to SHOOT' : 'CLICK to SHOOT'
   hint.style.display = 'flex'
   hint.style.opacity = '1'
   setTimeout(() => { hint.style.opacity = '0' }, 3000)

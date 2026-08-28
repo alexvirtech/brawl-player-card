@@ -171,7 +171,12 @@
         document.getElementById('acct-nick-text').textContent = data.nickname
         editRow.style.display = 'none'
         nameDisplay.style.display = ''
-        if (typeof mp !== 'undefined' && mp) mp.nickname = data.nickname
+        if (typeof mp !== 'undefined' && mp) {
+          mp.nickname = data.nickname
+          if (mp.socket && mp.socket.connected) {
+            mp.socket.emit('nickname-change', { nickname: data.nickname })
+          }
+        }
         var menuNick = document.getElementById('menu-nickname')
         if (menuNick) menuNick.textContent = data.nickname
       }).catch(function() {

@@ -298,22 +298,26 @@
     }
 
     .game-overlay-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+      padding: 6px 12px;
+      border-radius: 16px;
       border: none;
-      background: rgba(0,0,0,0.5);
-      color: #ccc;
-      font-size: 0.75rem;
+      background: rgba(0,0,0,0.55);
+      color: #ddd;
+      font-size: 0.7rem;
       font-weight: 800;
       cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 4px;
       backdrop-filter: blur(4px);
+      letter-spacing: 0.5px;
+      transition: transform 0.15s, background 0.15s;
     }
-    .game-overlay-btn:hover { background: rgba(0,0,0,0.7); }
-    .game-overlay-btn.end-btn { color: #ff6b6b; }
+    .game-overlay-btn:hover { background: rgba(0,0,0,0.75); transform: scale(1.05); }
+    .game-overlay-btn:active { transform: scale(0.95); }
+    .game-overlay-btn .btn-icon { font-size: 0.85rem; line-height: 1; }
+    .game-overlay-btn.end-btn { background: rgba(200,40,40,0.45); color: #ffaaaa; }
+    .game-overlay-btn.end-btn:hover { background: rgba(200,40,40,0.7); }
 
     /* === Results === */
     .results-table {
@@ -497,8 +501,8 @@
         <canvas id="mp-canvas" width="960" height="640"></canvas>
         <div id="mp-hud"></div>
         <div id="game-top-btns">
-          <button id="game-account-btn" class="game-overlay-btn" title="Account">ACC</button>
-          <button id="end-game-btn" class="game-overlay-btn end-btn" title="End Game">END</button>
+          <button id="game-account-btn" class="game-overlay-btn" title="Account"><span class="btn-icon">&#x1F464;</span></button>
+          <button id="end-game-btn" class="game-overlay-btn end-btn" title="End Game"><span class="btn-icon">&#x2716;</span></button>
         </div>
         <div id="controls-hint">
           <div class="hint-side hint-move">DRAG to MOVE</div>
