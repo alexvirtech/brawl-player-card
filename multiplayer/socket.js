@@ -14,6 +14,7 @@ export function setupSocket(io, prisma, roomManager) {
   io.on('connection', (socket) => {
     const playerId = socket.player.id
     const nickname = socket.player.nickname
+    console.log(`[ws] connect: ${nickname} (${playerId.slice(0, 8)})`)
 
     socket.on('lobby-join', ({ code }) => {
       const room = roomManager.getRoom(code)
@@ -23,6 +24,10 @@ export function setupSocket(io, prisma, roomManager) {
       }
 
       socket.join(room.socketRoom)
+
+      if (room.playerIds.includes(playerId)) {
+        roomManager.addPlayerToRoom(code, playerId)
+      }
 
       if (room.status === 'playing' && room.playerIds.includes(playerId)) {
         room.handleReconnect(playerId)
@@ -35,6 +40,7 @@ export function setupSocket(io, prisma, roomManager) {
         if (snapshot) {
           socket.emit('snapshot', snapshot)
         }
+        console.log(`[ws] ${nickname} reconnected to game ${code}`)
         return
       }
 
@@ -85,6 +91,8 @@ export function setupSocket(io, prisma, roomManager) {
       if (!room || room.hostId !== playerId) return
       if (room.status !== 'waiting' || room.slots.length < 2) return
 
+      console.log(`[ws] ${nickname} starting game ${code} (${room.slots.length} players)`)
+
       await prisma.game.update({
         where: { id: room.gameId },
         data: { status: 'countdown', startedAt: new Date() },
@@ -112,6 +120,7 @@ export function setupSocket(io, prisma, roomManager) {
               },
             })
           }
+          console.log(`[ws] game ${code} results saved`)
         } catch (err) {
           console.error('Error saving results:', err)
         }
@@ -122,8 +131,27 @@ export function setupSocket(io, prisma, roomManager) {
 
     socket.on('input', (input) => {
       const room = roomManager.getRoomForPlayer(playerId)
-      if (room) {
-        room.handleInput(playerId, input)
+      if (!room) return
+      room.handleInput(playerId, input)
+    })
+
+    socket.on('end-game', ({ code }) => {
+      const room = roomManager.getRoom(code)
+      if (!room || room.hostId !== playerId) return
+      if (room.status !== 'playing') return
+      console.log(`[ws] ${nickname} ended game ${code} early`)
+      room.finishGame()
+    })
+
+    socket.on('leave-game', ({ code }) => {
+      const room = roomManager.getRoom(code)
+      if (!room) return
+
+      socket.leave(room.socketRoom)
+
+      if (room.status === 'playing' && room.world) {
+        room.world.setConnected(playerId, false)
+        io.to(room.socketRoom).emit('player-disconnected', { playerId })
       }
     })
 
@@ -143,7 +171,7 @@ export function setupSocket(io, prisma, roomManager) {
             hostId: room.hostId,
           })
         }
-      } else if (room.status === 'playing') {
+      } else if (room.status === 'playing' || room.status === 'countdown') {
         room.handleDisconnect(playerId)
         io.to(room.socketRoom).emit('player-disconnected', { playerId })
       }

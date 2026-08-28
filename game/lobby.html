@@ -15,6 +15,14 @@
       user-select: none;
     }
 
+    body.game-active {
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
     .container {
       max-width: 520px;
       padding: 24px 16px;
@@ -198,12 +206,6 @@
       color: #ff6b8a;
     }
 
-    .status-msg.info {
-      background: rgba(68,136,255,0.15);
-      border: 1px solid #4488ff;
-      color: #88bbff;
-    }
-
     .or-divider {
       text-align: center;
       color: #555;
@@ -221,7 +223,23 @@
       margin: 40px 0;
     }
 
-    /* === Game canvas (multiplayer) === */
+    .menu-account-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #ccc;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+    .menu-account-btn:hover { border-color: #ffd700; color: #ffd700; }
+
+    /* === Game canvas === */
     #mp-game-wrapper {
       position: relative;
       width: 100%;
@@ -262,6 +280,33 @@
       white-space: nowrap;
     }
 
+    #game-top-btns {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 6px;
+      z-index: 20;
+    }
+
+    .game-overlay-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,0.5);
+      color: #ccc;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .game-overlay-btn:hover { background: rgba(0,0,0,0.7); }
+    .game-overlay-btn.end-btn { color: #ff6b6b; }
+
     /* === Results === */
     .results-table {
       width: 100%;
@@ -289,23 +334,95 @@
     }
 
     .placement-medal {
+      font-size: 1rem;
+    }
+
+    /* === Modal === */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-box {
+      background: #1a1a2e;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 420px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: none;
+      border: none;
+      color: #888;
       font-size: 1.3rem;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
     }
+    .modal-close:hover { color: #fff; background: rgba(255,255,255,0.1); }
 
-    /* Multiplayer game screen - full width */
-    #screen-game.active {
-      display: block;
-    }
+    .acct-header { text-align: center; margin-bottom: 16px; }
+    .acct-avatar { font-size: 2.5rem; margin-bottom: 4px; }
+    .acct-name { font-size: 1.5rem; font-weight: 900; color: #ffd700; }
+    .acct-since { font-size: 0.75rem; color: #666; margin-top: 4px; }
 
-    #screen-game .container {
-      max-width: 960px;
-      padding: 8px;
+    .acct-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin: 16px 0;
     }
+    .acct-stat {
+      text-align: center;
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 12px 4px;
+    }
+    .acct-val { display: block; font-size: 1.3rem; font-weight: 900; color: #ffd700; }
+    .acct-lbl { display: block; font-size: 0.6rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+    .hist-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+    }
+    .hist-win { color: #ffd700; font-weight: 800; min-width: 32px; }
+    .hist-loss { color: #888; font-weight: 800; min-width: 32px; }
+    .hist-info { flex: 1; color: #888; font-size: 0.75rem; }
+    .hist-pts { font-weight: 800; }
+
+    /* === Game screen full width === */
+    #screen-game.active { display: block; }
+    #screen-game .container { max-width: 960px; padding: 8px; }
 
     @media (max-width: 640px) {
       .container { padding: 16px 12px; }
       .code-display { font-size: 2.2rem; letter-spacing: 8px; }
       .code-input { font-size: 1.5rem; letter-spacing: 6px; }
+      .acct-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+      .acct-val { font-size: 1.1rem; }
 
       #screen-game .container {
         padding: 0;
@@ -337,7 +454,7 @@
   <!-- Screen: Nickname -->
   <div id="screen-nickname" class="screen">
     <div class="container">
-      <a href="/game/" class="back-link">← Back to Game</a>
+      <a href="/game/" class="back-link">&larr; Back to Game</a>
       <h1>Choose Your Name</h1>
       <input type="text" id="nickname-input" class="nickname-input"
              placeholder="Your battle name" maxlength="20" autocomplete="off">
@@ -346,32 +463,29 @@
     </div>
   </div>
 
-  <!-- Screen: Menu (Create/Join) -->
+  <!-- Screen: Menu -->
   <div id="screen-menu" class="screen">
     <div class="container">
-      <a href="/game/" class="back-link">← Back to Game</a>
+      <a href="/game/" class="back-link">&larr; Back to Game</a>
       <h1>Play With Friends</h1>
       <div class="card" style="text-align:center; margin-bottom:12px">
         <div style="color:#aaa; font-size:0.85rem; margin-bottom:4px">Playing as</div>
         <div id="menu-nickname" style="font-size:1.3rem; font-weight:800; color:#ffd700"></div>
       </div>
       <button id="create-btn" class="big-button">CREATE GAME</button>
-      <div class="or-divider">— or join a friend —</div>
+      <div class="or-divider">&mdash; or join a friend &mdash;</div>
       <input type="text" id="join-code-input" class="code-input"
              placeholder="Enter code" maxlength="6" inputmode="numeric" autocomplete="off">
       <button id="join-btn" class="big-button" style="background:linear-gradient(135deg,#44ddff,#4488ff)">JOIN GAME</button>
       <div id="menu-error" class="status-msg error" style="display:none"></div>
-
-      <div style="text-align:center; margin-top:20px">
-        <a href="/player/" style="color:#888; font-size:0.85rem; text-decoration:none">View Profile & Stats →</a>
-      </div>
+      <button class="menu-account-btn" onclick="openAccountModal()">MY ACCOUNT</button>
     </div>
   </div>
 
-  <!-- Screen: Lobby (Host / Waiting) -->
+  <!-- Screen: Lobby -->
   <div id="screen-lobby" class="screen">
     <div class="container">
-      <a href="/game/lobby.html" class="back-link" id="lobby-back">← Leave Game</a>
+      <a href="/game/lobby.html" class="back-link" id="lobby-back">&larr; Leave Game</a>
       <h1>Game Lobby</h1>
       <div id="lobby-code-section">
         <div class="code-display" id="lobby-code"></div>
@@ -394,7 +508,7 @@
 
       <div id="host-controls" style="display:none">
         <button id="start-game-btn" class="big-button" disabled>
-          START GAME (need 2+ players)
+          Need 2+ players
         </button>
       </div>
 
@@ -428,6 +542,10 @@
       <div id="mp-game-wrapper">
         <canvas id="mp-canvas" width="960" height="640"></canvas>
         <div id="mp-hud"></div>
+        <div id="game-top-btns">
+          <button id="game-account-btn" class="game-overlay-btn" title="Account">ACC</button>
+          <button id="end-game-btn" class="game-overlay-btn end-btn" title="End Game">END</button>
+        </div>
       </div>
     </div>
   </div>
@@ -445,9 +563,18 @@
         </table>
       </div>
       <button class="big-button" onclick="window.location.href='/game/lobby.html'">PLAY AGAIN</button>
+      <button class="menu-account-btn" onclick="openAccountModal()">MY ACCOUNT</button>
       <div style="text-align:center; margin-top:8px">
         <a href="/game/" style="color:#888; font-size:0.85rem; text-decoration:none">Back to Game Menu</a>
       </div>
+    </div>
+  </div>
+
+  <!-- Account Modal -->
+  <div id="account-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeAccountModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeAccountModal()">&times;</button>
+      <div id="account-content"></div>
     </div>
   </div>
 
