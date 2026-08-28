@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BEN BATTLE — Multiplayer</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 0;
+      align-items: center;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 520px;
+      padding: 24px 16px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .back-link {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+    .back-link:hover { color: #ffd700; }
+
+    .nickname-input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-size: 1.2rem;
+      text-align: center;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    .nickname-input:focus { border-color: #ffd700; }
+
+    .code-display {
+      text-align: center;
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: 12px;
+      color: #ffd700;
+      margin: 20px 0 8px;
+      font-family: monospace;
+    }
+
+    .share-row {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .copy-btn {
+      padding: 8px 20px;
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 8px;
+      background: transparent;
+      color: #ffd700;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: rgba(255,215,0,0.1); }
+
+    .code-input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #ffd700;
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 8px;
+      outline: none;
+      font-family: monospace;
+      margin-bottom: 16px;
+    }
+    .code-input:focus { border-color: #ffd700; }
+    .code-input::placeholder {
+      color: #555;
+      letter-spacing: 4px;
+      font-size: 1.2rem;
+    }
+
+    .player-list {
+      list-style: none;
+      margin: 16px 0;
+    }
+
+    .player-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .player-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .player-name {
+      flex: 1;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .host-badge {
+      font-size: 0.7rem;
+      color: #ffd700;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .request-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(255,215,0,0.08);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .request-name { flex: 1; font-weight: 700; }
+
+    .accept-btn, .reject-btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .accept-btn {
+      background: #44dd44;
+      color: #1a1a2e;
+    }
+
+    .reject-btn {
+      background: #ff4455;
+      color: #fff;
+    }
+
+    .waiting-msg {
+      text-align: center;
+      color: #888;
+      font-size: 1rem;
+      margin: 20px 0;
+    }
+
+    .waiting-msg .spinner-small {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255,255,255,0.15);
+      border-top-color: #ffd700;
+      border-radius: 50%;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status-msg {
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 12px 0;
+      font-weight: 700;
+    }
+
+    .status-msg.error {
+      background: rgba(255,56,96,0.15);
+      border: 1px solid #ff3860;
+      color: #ff6b8a;
+    }
+
+    .status-msg.info {
+      background: rgba(68,136,255,0.15);
+      border: 1px solid #4488ff;
+      color: #88bbff;
+    }
+
+    .or-divider {
+      text-align: center;
+      color: #555;
+      font-size: 0.85rem;
+      margin: 16px 0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .countdown-big {
+      text-align: center;
+      font-size: 6rem;
+      font-weight: 900;
+      color: #ffd700;
+      margin: 40px 0;
+    }
+
+    /* === Game canvas (multiplayer) === */
+    #mp-game-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      aspect-ratio: 960 / 640;
+      margin: 0 auto;
+    }
+
+    #mp-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      cursor: crosshair;
+      touch-action: none;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    #mp-hud {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hud-player {
+      background: rgba(0,0,0,0.6);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    /* === Results === */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+
+    .results-table th {
+      color: #888;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .results-table td {
+      padding: 10px 8px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-weight: 700;
+    }
+
+    .results-table tr.winner td {
+      color: #ffd700;
+    }
+
+    .placement-medal {
+      font-size: 1.3rem;
+    }
+
+    /* Multiplayer game screen - full width */
+    #screen-game.active {
+      display: block;
+    }
+
+    #screen-game .container {
+      max-width: 960px;
+      padding: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 16px 12px; }
+      .code-display { font-size: 2.2rem; letter-spacing: 8px; }
+      .code-input { font-size: 1.5rem; letter-spacing: 6px; }
+
+      #screen-game .container {
+        padding: 0;
+        max-width: 100%;
+      }
+
+      #mp-game-wrapper {
+        border-radius: 0;
+        max-width: 100%;
+      }
+
+      #mp-canvas {
+        border-radius: 0;
+      }
+    }
+
+    @media (max-width: 640px) and (orientation: landscape) {
+      #mp-game-wrapper {
+        width: auto;
+        height: 100vh;
+        height: 100dvh;
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen: Nickname -->
+  <div id="screen-nickname" class="screen">
+    <div class="container">
+      <a href="/game/" class="back-link">← Back to Game</a>
+      <h1>Choose Your Name</h1>
+      <input type="text" id="nickname-input" class="nickname-input"
+             placeholder="Your battle name" maxlength="20" autocomplete="off">
+      <button id="nickname-btn" class="big-button">LET'S GO!</button>
+      <div id="nickname-error" class="status-msg error" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Screen: Menu (Create/Join) -->
+  <div id="screen-menu" class="screen">
+    <div class="container">
+      <a href="/game/" class="back-link">← Back to Game</a>
+      <h1>Play With Friends</h1>
+      <div class="card" style="text-align:center; margin-bottom:12px">
+        <div style="color:#aaa; font-size:0.85rem; margin-bottom:4px">Playing as</div>
+        <div id="menu-nickname" style="font-size:1.3rem; font-weight:800; color:#ffd700"></div>
+      </div>
+      <button id="create-btn" class="big-button">CREATE GAME</button>
+      <div class="or-divider">— or join a friend —</div>
+      <input type="text" id="join-code-input" class="code-input"
+             placeholder="Enter code" maxlength="6" inputmode="numeric" autocomplete="off">
+      <button id="join-btn" class="big-button" style="background:linear-gradient(135deg,#44ddff,#4488ff)">JOIN GAME</button>
+      <div id="menu-error" class="status-msg error" style="display:none"></div>
+
+      <div style="text-align:center; margin-top:20px">
+        <a href="/player/" style="color:#888; font-size:0.85rem; text-decoration:none">View Profile & Stats →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen: Lobby (Host / Waiting) -->
+  <div id="screen-lobby" class="screen">
+    <div class="container">
+      <a href="/game/lobby.html" class="back-link" id="lobby-back">← Leave Game</a>
+      <h1>Game Lobby</h1>
+      <div id="lobby-code-section">
+        <div class="code-display" id="lobby-code"></div>
+        <div class="share-row">
+          <button class="copy-btn" id="copy-link-btn">Copy Share Link</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:8px">Players</h3>
+        <ul class="player-list" id="lobby-players"></ul>
+      </div>
+
+      <div id="join-requests-section" style="display:none">
+        <div class="card">
+          <h3 style="margin-bottom:8px">Join Requests</h3>
+          <div id="join-requests-list"></div>
+        </div>
+      </div>
+
+      <div id="host-controls" style="display:none">
+        <button id="start-game-btn" class="big-button" disabled>
+          START GAME (need 2+ players)
+        </button>
+      </div>
+
+      <div id="waiting-section" style="display:none">
+        <div class="waiting-msg">
+          <span class="spinner-small"></span> Waiting for host to start...
+        </div>
+      </div>
+
+      <div id="pending-section" style="display:none">
+        <div class="waiting-msg">
+          <span class="spinner-small"></span> Waiting for host to accept you...
+        </div>
+      </div>
+
+      <div id="lobby-error" class="status-msg error" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Screen: Countdown -->
+  <div id="screen-countdown" class="screen">
+    <div class="container" style="text-align:center">
+      <h1>GET READY!</h1>
+      <div class="countdown-big" id="countdown-number">3</div>
+    </div>
+  </div>
+
+  <!-- Screen: Game -->
+  <div id="screen-game" class="screen">
+    <div class="container">
+      <div id="mp-game-wrapper">
+        <canvas id="mp-canvas" width="960" height="640"></canvas>
+        <div id="mp-hud"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen: Results -->
+  <div id="screen-results" class="screen">
+    <div class="container">
+      <h1 id="results-title">Game Over!</h1>
+      <div class="card">
+        <table class="results-table">
+          <thead>
+            <tr><th></th><th>Player</th><th>Score</th><th>K</th><th>D</th></tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+      <button class="big-button" onclick="window.location.href='/game/lobby.html'">PLAY AGAIN</button>
+      <div style="text-align:center; margin-top:8px">
+        <a href="/game/" style="color:#888; font-size:0.85rem; text-decoration:none">Back to Game Menu</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/game/js/config.js"></script>
+  <script src="js/mp-client.js"></script>
+</body>
+</html>

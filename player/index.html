@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Profile — BEN BATTLE</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    .profile-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #4488ff, #44ddff);
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    .profile-name {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #ffd700;
+    }
+
+    .profile-since {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #ffd700;
+    }
+
+    .stat-card .label {
+      font-size: 0.75rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .history-item {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-result {
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .history-result.win { color: #ffd700; }
+    .history-result.loss { color: #888; }
+
+    .history-details {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .no-profile {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .no-profile p {
+      color: #888;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      <span class="site-title">BEN BATTLE</span>
+      <a href="/game/" class="home-link">← Game</a>
+    </div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading profile...</p>
+    </div>
+
+    <div id="no-profile" class="no-profile" style="display:none">
+      <h1>No Profile Yet</h1>
+      <p>Play a multiplayer game to create your profile!</p>
+      <a href="/game/lobby.html" class="big-button" style="display:inline-block; text-decoration:none">PLAY WITH FRIENDS</a>
+    </div>
+
+    <div id="profile" style="display:none">
+      <div class="profile-header">
+        <div class="profile-avatar">🎮</div>
+        <div class="profile-name" id="profile-name"></div>
+        <div class="profile-since" id="profile-since"></div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="value" id="stat-wins">0</div>
+          <div class="label">Wins</div>
+        </div>
+        <div class="stat-card">
+          <div class="value" id="stat-games">0</div>
+          <div class="label">Games</div>
+        </div>
+        <div class="stat-card">
+          <div class="value" id="stat-kills">0</div>
+          <div class="label">Total Kills</div>
+        </div>
+        <div class="stat-card">
+          <div class="value" id="stat-deaths">0</div>
+          <div class="label">Total Deaths</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:12px">Recent Games</h3>
+        <div id="history-list"></div>
+        <div id="no-history" style="display:none; text-align:center; color:#666; padding:16px">
+          No games played yet
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MP_SERVER = window.location.hostname === 'localhost'
+      ? 'http://localhost:3001'
+      : 'https://ben-battle-mp-b0c1a7d8f35e.herokuapp.com'
+
+    const token = localStorage.getItem('mp-token')
+
+    async function loadProfile() {
+      if (!token) {
+        document.getElementById('loading').style.display = 'none'
+        document.getElementById('no-profile').style.display = 'block'
+        return
+      }
+
+      try {
+        const headers = {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json',
+        }
+
+        const [profile, historyRes] = await Promise.all([
+          fetch(MP_SERVER + '/api/players/me', { headers }).then(r => r.json()),
+          fetch(MP_SERVER + '/api/players/me/history', { headers }).then(r => r.json()),
+        ])
+
+        document.getElementById('loading').style.display = 'none'
+        document.getElementById('profile').style.display = 'block'
+
+        document.getElementById('profile-name').textContent = profile.nickname
+        document.getElementById('profile-since').textContent =
+          'Playing since ' + new Date(profile.createdAt).toLocaleDateString()
+
+        document.getElementById('stat-wins').textContent = profile.stats.wins
+        document.getElementById('stat-games').textContent = profile.stats.gamesPlayed
+        document.getElementById('stat-kills').textContent = profile.stats.totalKills
+        document.getElementById('stat-deaths').textContent = profile.stats.totalDeaths
+
+        const list = document.getElementById('history-list')
+        if (historyRes.length === 0) {
+          document.getElementById('no-history').style.display = 'block'
+        } else {
+          list.innerHTML = historyRes.map(g => {
+            const won = g.myPlacement === 1
+            const date = new Date(g.createdAt).toLocaleDateString()
+            return '<div class="history-item">' +
+              '<div>' +
+                '<div class="history-result ' + (won ? 'win' : 'loss') + '">' +
+                  (won ? '🏆 WIN' : '#' + g.myPlacement) +
+                '</div>' +
+                '<div class="history-details">' + date + ' · ' + g.players.length + ' players</div>' +
+              '</div>' +
+              '<div style="text-align:right">' +
+                '<div style="font-weight:800">' + g.myScore + ' pts</div>' +
+                '<div class="history-details">' + g.myKills + 'K / ' + g.myDeaths + 'D</div>' +
+              '</div>' +
+            '</div>'
+          }).join('')
+        }
+      } catch (e) {
+        document.getElementById('loading').style.display = 'none'
+        document.getElementById('no-profile').style.display = 'block'
+        console.error('Profile load error:', e)
+      }
+    }
+
+    loadProfile()
+  </script>
+</body>
+</html>

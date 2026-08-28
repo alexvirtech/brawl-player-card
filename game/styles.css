@@ -184,6 +184,24 @@ body {
   display: none;
 }
 
+/* === Start Buttons === */
+.start-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.mp-btn {
+  background: linear-gradient(135deg, #44ddff, #4488ff);
+  font-size: 1.2rem;
+  padding: 14px 40px;
+}
+
+.mp-btn:hover {
+  box-shadow: 0 6px 24px rgba(68, 136, 255, 0.4);
+}
+
 /* === End Screen === */
 #end-title {
   font-size: 3rem;

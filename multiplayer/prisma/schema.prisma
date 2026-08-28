@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id         String   @id @default(uuid())
+  nickname   String
+  tokenHash  String   @unique
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  hostedGames  Game[]         @relation("HostedGames")
+  wonGames     Game[]         @relation("WonGames")
+  gamePlayers  GamePlayer[]
+  joinRequests JoinRequest[]
+  decisions    JoinRequest[]  @relation("DecidedBy")
+}
+
+model Game {
+  id         String     @id @default(uuid())
+  publicCode String     @unique
+  status     GameStatus @default(waiting)
+  hostId     String
+  host       Player     @relation("HostedGames", fields: [hostId], references: [id])
+  winnerId   String?
+  winner     Player?    @relation("WonGames", fields: [winnerId], references: [id])
+  createdAt  DateTime   @default(now())
+  startedAt  DateTime?
+  endedAt    DateTime?
+
+  players      GamePlayer[]
+  joinRequests JoinRequest[]
+}
+
+model GamePlayer {
+  id        String @id @default(uuid())
+  gameId    String
+  game      Game   @relation(fields: [gameId], references: [id])
+  playerId  String
+  player    Player @relation(fields: [playerId], references: [id])
+  color     Int    @default(0)
+  score     Int    @default(0)
+  kills     Int    @default(0)
+  deaths    Int    @default(0)
+  placement Int?
+
+  @@unique([gameId, playerId])
+}
+
+model JoinRequest {
+  id              String            @id @default(uuid())
+  gameId          String
+  game            Game              @relation(fields: [gameId], references: [id])
+  playerId        String
+  player          Player            @relation(fields: [playerId], references: [id])
+  status          JoinRequestStatus @default(pending)
+  createdAt       DateTime          @default(now())
+  decidedAt       DateTime?
+  decidedById     String?
+  decidedBy       Player?           @relation("DecidedBy", fields: [decidedById], references: [id])
+
+  @@unique([gameId, playerId])
+}
+
+enum GameStatus {
+  waiting
+  countdown
+  playing
+  finished
+  cancelled
+}
+
+enum JoinRequestStatus {
+  pending
+  accepted
+  rejected
+}

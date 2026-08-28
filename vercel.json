@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/game/:code(\\d{6})",
+      "destination": "/game/lobby.html"
+    }
+  ]
+}
