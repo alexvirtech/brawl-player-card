@@ -159,8 +159,8 @@ class Enemy {
   }
 
   _drawHealthBar(ctx, size) {
-    const w = 40
-    const h = 5
+    const w = 56
+    const h = 6
     const ratio = this.health / this.maxHealth
     const x = this.x - w / 2
     const y = this.y - size - 12

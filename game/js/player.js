@@ -120,8 +120,8 @@ const Player = {
   },
 
   _drawHealthBar(ctx, cx, cy) {
-    const w = 40
-    const h = 5
+    const w = 56
+    const h = 6
     const ratio = this.health / this.maxHealth
     const x = cx - w / 2
 
