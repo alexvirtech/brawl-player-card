@@ -21,6 +21,8 @@ const Game = {
     Arena.init()
     Sound.init()
     UI.init()
+    Player.loadSettings()
+    if (typeof Customizer !== 'undefined') Customizer.init()
 
     document.getElementById('play-btn').addEventListener('click', () => {
       Sound.resume()

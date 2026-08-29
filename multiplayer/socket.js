@@ -1,4 +1,5 @@
 import { authenticateSocket } from './auth.js'
+import { validateServerAppearance, validateFigureMode } from './appearance-validation.js'
 
 export function setupSocket(io, prisma, roomManager) {
   io.use(async (socket, next) => {
@@ -157,6 +158,26 @@ export function setupSocket(io, prisma, roomManager) {
         if (wp) wp.nickname = trimmed
       }
       io.to(room.socketRoom).emit('nickname-updated', { playerId, nickname: trimmed })
+    })
+
+    socket.on('appearance-update', ({ figureMode, appearance }) => {
+      const fm = validateFigureMode(figureMode)
+      const app = validateServerAppearance(appearance)
+      const room = roomManager.getRoomForPlayer(playerId)
+      if (!room) return
+      const slot = room.slots.find(s => s.playerId === playerId)
+      if (slot) {
+        slot.figureMode = fm
+        slot.appearance = app
+      }
+      if (room.world) {
+        const wp = room.world.players.get(playerId)
+        if (wp) {
+          wp.figureMode = fm
+          wp.appearance = app
+        }
+      }
+      io.to(room.socketRoom).emit('appearance-updated', { playerId, figureMode: fm, appearance: app })
     })
 
     socket.on('leave-game', ({ code }) => {

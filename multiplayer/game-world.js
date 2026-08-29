@@ -1,4 +1,5 @@
 import { ARENA, PLAYER_CFG, BULLET_CFG, GAME_CFG, SPAWN_POINTS } from './game-config.js'
+import { validateServerAppearance, validateFigureMode } from './appearance-validation.js'
 
 function pushOut(cx, cy, radius) {
   let x = cx
@@ -53,6 +54,8 @@ export class GameWorld {
         id: slot.playerId,
         nickname: slot.nickname,
         colorIndex: slot.colorIndex,
+        figureMode: validateFigureMode(slot.figureMode),
+        appearance: validateServerAppearance(slot.appearance),
         x: sp.x,
         y: sp.y,
         health: PLAYER_CFG.health,
@@ -198,6 +201,8 @@ export class GameWorld {
         id: p.id,
         nickname: p.nickname,
         colorIndex: p.colorIndex,
+        figureMode: p.figureMode,
+        appearance: p.appearance,
         x: Math.round(p.x * 10) / 10,
         y: Math.round(p.y * 10) / 10,
         health: p.health,

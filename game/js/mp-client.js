@@ -370,6 +370,11 @@ function connectSocketInternal() {
   mp.socket.on('connect', () => {
     console.log('[mp] connected, joining', mp.gameCode)
     mp.socket.emit('lobby-join', { code: mp.gameCode })
+    const fm = localStorage.getItem('figureMode') || 'simple'
+    let app
+    try { app = JSON.parse(localStorage.getItem('appearance')) } catch (e) {}
+    if (!app) app = typeof DEFAULT_APPEARANCE !== 'undefined' ? DEFAULT_APPEARANCE : {}
+    mp.socket.emit('appearance-update', { figureMode: fm, appearance: app })
   })
 
   mp.socket.on('disconnect', (reason) => {
@@ -714,13 +719,21 @@ function renderGame(now) {
       }
     }
 
-    ctx.fillStyle = color.fill
-    ctx.beginPath()
-    ctx.arc(drawX, drawY, PLAYER_SIZE, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.strokeStyle = color.outline
-    ctx.lineWidth = isMe ? 3 : 2
-    ctx.stroke()
+    if (p.figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
+      const animState = { time: now / 1000, walking: false, lowHealth: p.health < 30, dead: !p.alive, hitFlash: 0, attackFlash: 0 }
+      AdvancedRenderer.drawCharacter(ctx, drawX, drawY, PLAYER_SIZE, p.angle, p.appearance || {}, animState)
+      AdvancedRenderer.drawHealthBar(ctx, drawX, drawY - PLAYER_SIZE - 24, p.health, 100)
+    } else {
+      ctx.fillStyle = color.fill
+      ctx.beginPath()
+      ctx.arc(drawX, drawY, PLAYER_SIZE, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = color.outline
+      ctx.lineWidth = isMe ? 3 : 2
+      ctx.stroke()
+      drawFace(ctx, drawX, drawY, PLAYER_SIZE, p.angle)
+      drawHealthBar(ctx, drawX, drawY - PLAYER_SIZE - 16, p.health, 100)
+    }
 
     if (isMe) {
       ctx.strokeStyle = '#ffffff55'
@@ -739,9 +752,6 @@ function renderGame(now) {
       ctx.globalAlpha = 1
       ctx.textAlign = 'start'
     }
-
-    drawFace(ctx, drawX, drawY, PLAYER_SIZE, p.angle)
-    drawHealthBar(ctx, drawX, drawY - PLAYER_SIZE - 16, p.health, 100)
 
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 11px "Segoe UI", sans-serif'

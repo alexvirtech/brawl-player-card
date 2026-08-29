@@ -7,6 +7,34 @@ const Player = {
   shootTimer: 0,
   angle: 0,
   hitFlash: 0,
+  figureMode: 'simple',
+  appearance: null,
+  anim: null,
+  _moving: false,
+  _speed: 0,
+
+  loadSettings() {
+    this.figureMode = localStorage.getItem('figureMode') || 'simple'
+    try {
+      const saved = JSON.parse(localStorage.getItem('appearance'))
+      this.appearance = saved || Object.assign({}, DEFAULT_APPEARANCE)
+    } catch (e) {
+      this.appearance = Object.assign({}, DEFAULT_APPEARANCE)
+    }
+    if (typeof AnimationController !== 'undefined') {
+      this.anim = new AnimationController()
+    }
+  },
+
+  saveFigureMode(mode) {
+    this.figureMode = mode
+    localStorage.setItem('figureMode', mode)
+  },
+
+  saveAppearance(app) {
+    this.appearance = validateAppearance(app)
+    localStorage.setItem('appearance', JSON.stringify(this.appearance))
+  },
 
   spawn() {
     const cfg = GAME_CONFIG.player
@@ -62,15 +90,30 @@ const Player = {
       const by = this.y + Math.sin(this.angle) * (cfg.size + 8)
       Bullets.create(bx, by, Math.cos(this.angle), Math.sin(this.angle), true)
       this.shootTimer = cfg.shootCooldown
+      if (this.anim) this.anim.triggerAttack()
       Sound.play('shoot')
     }
 
     if (this.hitFlash > 0) this.hitFlash -= dt * 5
+
+    this._moving = (dx !== 0 || dy !== 0)
+    this._speed = Math.sqrt(dx * dx + dy * dy) * GAME_CONFIG.player.speed
+
+    if (this.anim) {
+      this.anim.update(dt, {
+        health: this.health,
+        maxHealth: this.maxHealth,
+        alive: this.alive,
+        moving: this._moving,
+        speed: this._speed,
+      })
+    }
   },
 
   takeDamage(amount) {
     this.health -= amount
     this.hitFlash = 1
+    if (this.anim) this.anim.triggerHit()
     Sound.play('hit')
     if (this.health <= 0) {
       this.health = 0
@@ -82,6 +125,13 @@ const Player = {
     if (!this.alive) return
     const cfg = GAME_CONFIG.player
     const s = cfg.size
+
+    if (this.figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
+      const animState = this.anim ? this.anim.getState() : { hitFlash: this.hitFlash }
+      AdvancedRenderer.drawCharacter(ctx, this.x, this.y, s, this.angle, this.appearance || DEFAULT_APPEARANCE, animState)
+      AdvancedRenderer.drawHealthBar(ctx, this.x, this.y - s - 24, this.health, this.maxHealth)
+      return
+    }
 
     ctx.fillStyle = 'rgba(0,0,0,0.18)'
     ctx.beginPath()

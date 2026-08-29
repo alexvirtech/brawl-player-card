@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Apps — Ben's Brawl Apps</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .app-link {
+      display: block;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      padding: 14px 8px;
+      text-align: center;
+      text-decoration: none;
+      color: #f0f0f0;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .app-link:hover {
+      transform: scale(1.04);
+      border-color: rgba(255, 215, 0, 0.4);
+      box-shadow: 0 4px 16px rgba(255, 215, 0, 0.12);
+    }
+
+    .app-link .icon {
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+    }
+
+    .app-link .label {
+      font-weight: 700;
+      font-size: 0.78rem;
+    }
+
+    .app-link .number {
+      font-size: 0.65rem;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    @media (max-width: 480px) {
+      .app-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .app-link {
+        padding: 16px 8px;
+        min-height: 72px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .app-link .icon {
+        font-size: 1.6rem;
+        margin-bottom: 6px;
+      }
+
+      .app-link .label {
+        font-size: 0.82rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      <a href="/" class="home-link">&larr; Home</a>
+      <button class="acct-btn" onclick="openAccountModal()">&#x1F464; MY ACCOUNT</button>
+    </div>
+
+    <h1>&#x1F3AE; Mini Apps</h1>
+
+    <div class="app-grid">
+      <a href="/player-card/" class="app-link">
+        <div class="icon">&#x1FAAA;</div>
+        <div class="label">Player Card</div>
+        <div class="number">#1</div>
+      </a>
+
+      <a href="/trophy-meter/" class="app-link">
+        <div class="icon">&#x1F3C6;</div>
+        <div class="label">Trophy Meter</div>
+        <div class="number">#2</div>
+      </a>
+
+      <a href="/best-brawlers/" class="app-link">
+        <div class="icon">&#x2B50;</div>
+        <div class="label">Best Brawlers</div>
+        <div class="number">#3</div>
+      </a>
+
+      <a href="/find-brawler/" class="app-link">
+        <div class="icon">&#x1F50D;</div>
+        <div class="label">Find Brawler</div>
+        <div class="number">#4</div>
+      </a>
+
+      <a href="/champion/" class="app-link">
+        <div class="icon">&#x1F451;</div>
+        <div class="label">Champion</div>
+        <div class="number">#5</div>
+      </a>
+
+      <a href="/compare-brawlers/" class="app-link">
+        <div class="icon">&#x2694;&#xFE0F;</div>
+        <div class="label">Compare</div>
+        <div class="number">#6</div>
+      </a>
+
+      <a href="/compare-players/" class="app-link">
+        <div class="icon">&#x1F19A;</div>
+        <div class="label">VS Players</div>
+        <div class="number">#7</div>
+      </a>
+
+      <a href="/random-brawler/" class="app-link">
+        <div class="icon">&#x1F3B2;</div>
+        <div class="label">Random</div>
+        <div class="number">#8</div>
+      </a>
+
+      <a href="/todays-challenge/" class="app-link">
+        <div class="icon">&#x1F3AF;</div>
+        <div class="label">Challenge</div>
+        <div class="number">#9</div>
+      </a>
+
+      <a href="/brawler-gallery/" class="app-link">
+        <div class="icon">&#x1F5BC;&#xFE0F;</div>
+        <div class="label">Gallery</div>
+        <div class="number">#10</div>
+      </a>
+    </div>
+  </div>
+  <script src="/js/account.js"></script>
+</body>
+</html>
