@@ -266,6 +266,7 @@
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       user-select: none;
+      -webkit-user-drag: none;
     }
 
     #mp-hud {
@@ -500,7 +501,7 @@
   <div id="screen-game" class="screen">
     <div class="container">
       <div id="mp-game-wrapper">
-        <canvas id="mp-canvas" width="960" height="640"></canvas>
+        <canvas id="mp-canvas" width="960" height="640" draggable="false"></canvas>
         <div id="mp-hud"></div>
         <div id="game-top-btns">
           <button id="game-char-btn" class="game-overlay-btn" title="Character" onclick="Customizer.open()"><span class="btn-icon">&#x1F3AD;</span></button>

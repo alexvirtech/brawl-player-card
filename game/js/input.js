@@ -39,9 +39,10 @@ const Input = {
       this.mouse.y = p.y
     })
 
-    canvas.addEventListener('mousedown', () => { this.mouse.down = true })
-    canvas.addEventListener('mouseup', () => { this.mouse.down = false })
+    canvas.addEventListener('mousedown', e => { e.preventDefault(); this.mouse.down = true })
+    canvas.addEventListener('mouseup', e => { this.mouse.down = false })
     canvas.addEventListener('contextmenu', e => e.preventDefault())
+    canvas.addEventListener('dragstart', e => e.preventDefault())
 
     // --- Touch controls ---
     // Left half of screen = virtual joystick (drag to move)

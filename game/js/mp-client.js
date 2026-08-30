@@ -931,12 +931,14 @@ function setupMPInput(canvas) {
     mp.mouse.x = p.x
     mp.mouse.y = p.y
   })
-  canvas.addEventListener('mousedown', () => {
+  canvas.addEventListener('mousedown', e => {
+    e.preventDefault()
     mp.mouse.down = true
     resumeAudio()
   })
   canvas.addEventListener('mouseup', () => { mp.mouse.down = false })
   canvas.addEventListener('contextmenu', e => e.preventDefault())
+  canvas.addEventListener('dragstart', e => e.preventDefault())
 
   canvas.addEventListener('touchstart', e => {
     e.preventDefault()
