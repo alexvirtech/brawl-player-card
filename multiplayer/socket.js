@@ -25,9 +25,17 @@ export function setupSocket(io, prisma, roomManager) {
       }
 
       socket.join(room.socketRoom)
+      socket.gameCode = code
 
       if (room.playerIds.includes(playerId)) {
         roomManager.addPlayerToRoom(code, playerId)
+        if (socket.figureMode || socket.appearance) {
+          const slot = room.slots.find(s => s.playerId === playerId)
+          if (slot) {
+            if (socket.figureMode) slot.figureMode = socket.figureMode
+            if (socket.appearance) slot.appearance = socket.appearance
+          }
+        }
       }
 
       if (room.status === 'playing' && room.playerIds.includes(playerId)) {
@@ -67,6 +75,19 @@ export function setupSocket(io, prisma, roomManager) {
     socket.on('accept-player', async ({ code, targetPlayerId }) => {
       const room = roomManager.getRoom(code)
       if (!room || room.hostId !== playerId) return
+
+      roomManager.addPlayerToRoom(code, targetPlayerId)
+
+      const targetSocket = [...io.of('/').sockets.values()].find(
+        s => s.player && s.player.id === targetPlayerId
+      )
+      if (targetSocket) {
+        const slot = room.slots.find(s => s.playerId === targetPlayerId)
+        if (slot) {
+          if (targetSocket.figureMode) slot.figureMode = targetSocket.figureMode
+          if (targetSocket.appearance) slot.appearance = targetSocket.appearance
+        }
+      }
 
       io.to(room.socketRoom).emit('player-accepted', {
         playerId: targetPlayerId,
@@ -163,7 +184,17 @@ export function setupSocket(io, prisma, roomManager) {
     socket.on('appearance-update', ({ figureMode, appearance }) => {
       const fm = validateFigureMode(figureMode)
       const app = validateServerAppearance(appearance)
-      const room = roomManager.getRoomForPlayer(playerId)
+      socket.figureMode = fm
+      socket.appearance = app
+      let room = roomManager.getRoomForPlayer(playerId)
+      if (!room && socket.gameCode) {
+        room = roomManager.getRoom(socket.gameCode)
+        if (room && room.playerIds.includes(playerId)) {
+          roomManager.addPlayerToRoom(socket.gameCode, playerId)
+        } else {
+          room = null
+        }
+      }
       if (!room) return
       const slot = room.slots.find(s => s.playerId === playerId)
       if (slot) {
