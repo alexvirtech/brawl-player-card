@@ -4,6 +4,21 @@ const Customizer = {
   _previewCtx: null,
   _open: false,
   _tempAppearance: null,
+  _figureMode: 'simple',
+
+  _getFigureMode() {
+    if (typeof Player !== 'undefined' && Player.figureMode) return Player.figureMode
+    return localStorage.getItem('figureMode') || 'simple'
+  },
+
+  _getAppearance() {
+    if (typeof Player !== 'undefined' && Player.appearance) return Player.appearance
+    try {
+      const saved = JSON.parse(localStorage.getItem('appearance'))
+      if (saved) return saved
+    } catch (e) {}
+    return Object.assign({}, DEFAULT_APPEARANCE)
+  },
 
   init() {
     this._injectStyles()
@@ -17,29 +32,31 @@ const Customizer = {
     style.textContent =
       '#customizer-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:900;padding:12px}' +
       '#customizer-overlay.open{display:flex}' +
-      '#customizer-panel{background:#1a1a2e;border-radius:16px;padding:20px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;position:relative;border:1px solid rgba(255,255,255,.1)}' +
+      '#customizer-panel{background:#1a1a2e;border-radius:16px;padding:20px;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;position:relative;border:1px solid rgba(255,255,255,.1)}' +
       '.cust-close{position:absolute;top:10px;right:10px;background:none;border:none;color:#888;font-size:1.4rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center}' +
       '.cust-close:hover{color:#fff;background:rgba(255,255,255,.1)}' +
       '.cust-title{text-align:center;font-size:1.2rem;font-weight:900;color:#ffd700;margin-bottom:12px}' +
-      '.cust-mode-toggle{display:flex;gap:6px;margin-bottom:16px;background:rgba(255,255,255,.06);border-radius:10px;padding:4px}' +
+      '.cust-mode-toggle{display:flex;gap:6px;margin-bottom:12px;background:rgba(255,255,255,.06);border-radius:10px;padding:4px}' +
       '.cust-mode-btn{flex:1;padding:10px;border:none;border-radius:8px;font-weight:800;font-size:.85rem;cursor:pointer;transition:all .15s;background:transparent;color:#888}' +
       '.cust-mode-btn.active{background:linear-gradient(135deg,#ffd700,#ff6b35);color:#1a1a2e}' +
-      '#cust-preview-wrap{text-align:center;margin:12px 0}' +
+      '#cust-preview-wrap{text-align:center;margin:8px 0 12px}' +
       '#cust-preview{border-radius:12px;background:#0a0a1e}' +
       '#cust-advanced-opts{display:none}' +
-      '#cust-advanced-opts.show{display:block}' +
-      '.cust-section{margin:10px 0}' +
-      '.cust-section-label{font-size:.75rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}' +
-      '.cust-options{display:flex;flex-wrap:wrap;gap:6px}' +
-      '.cust-opt{padding:8px 14px;border:2px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.05);color:#ccc;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .15s}' +
+      '#cust-advanced-opts.show{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}' +
+      '.cust-section{margin:4px 0}' +
+      '.cust-section-label{font-size:.7rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}' +
+      '.cust-options{display:flex;flex-wrap:wrap;gap:4px}' +
+      '.cust-opt{padding:5px 10px;border:2px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.05);color:#ccc;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s}' +
       '.cust-opt:hover{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.06)}' +
       '.cust-opt.selected{border-color:#ffd700;background:rgba(255,215,0,.15);color:#ffd700}' +
-      '.cust-color-opt{width:36px;height:36px;border:3px solid rgba(255,255,255,.1);border-radius:50%;cursor:pointer;transition:all .15s;padding:0}' +
+      '.cust-color-opt{width:28px;height:28px;border:3px solid rgba(255,255,255,.1);border-radius:50%;cursor:pointer;transition:all .15s;padding:0}' +
       '.cust-color-opt.selected{border-color:#ffd700;box-shadow:0 0 8px rgba(255,215,0,.4)}' +
-      '.cust-actions{display:flex;gap:8px;margin-top:16px}' +
+      '.cust-actions{display:flex;gap:8px;margin-top:12px}' +
       '.cust-actions button{flex:1;padding:10px;border:none;border-radius:10px;font-weight:800;font-size:.85rem;cursor:pointer;transition:transform .15s}' +
       '.cust-save{background:linear-gradient(135deg,#ffd700,#ff6b35);color:#1a1a2e}' +
-      '.cust-reset{background:rgba(255,255,255,.08);color:#888}'
+      '.cust-reset{background:rgba(255,255,255,.08);color:#888}' +
+      '.cust-section.cust-wide{grid-column:1/-1}' +
+      '@media(max-width:480px){#cust-advanced-opts.show{grid-template-columns:1fr}}'
     document.head.appendChild(style)
   },
 
@@ -56,15 +73,15 @@ const Customizer = {
           '<button class="cust-mode-btn" data-mode="simple" onclick="Customizer._setMode(\'simple\')">SIMPLE</button>' +
           '<button class="cust-mode-btn" data-mode="advanced" onclick="Customizer._setMode(\'advanced\')">ADVANCED</button>' +
         '</div>' +
-        '<div id="cust-preview-wrap"><canvas id="cust-preview" width="120" height="120"></canvas></div>' +
+        '<div id="cust-preview-wrap"><canvas id="cust-preview" width="200" height="200"></canvas></div>' +
         '<div id="cust-advanced-opts">' +
-          this._buildSection('Skin', 'skinColor', SKIN_COLORS.map((c, i) => ({ id: i, color: c })), true) +
+          this._buildSection('Skin', 'skinColor', SKIN_COLORS.map((c, i) => ({ id: i, color: c })), true, true) +
           this._buildSection('Body', 'body', APPEARANCE_CATALOG.body) +
           this._buildSection('Face', 'face', APPEARANCE_CATALOG.face) +
-          this._buildSection('Hair / Hat', 'hairHat', APPEARANCE_CATALOG.hairHat) +
+          this._buildSection('Hair / Hat', 'hairHat', APPEARANCE_CATALOG.hairHat, false, true) +
           this._buildSection('Shirt', 'shirt', APPEARANCE_CATALOG.shirt) +
           this._buildSection('Pants', 'pants', APPEARANCE_CATALOG.pants) +
-          this._buildSection('Weapon', 'weapon', WEAPON_CATALOG) +
+          this._buildSection('Weapon', 'weapon', WEAPON_CATALOG, false, true) +
           this._buildSection('Accessory', 'accessory', APPEARANCE_CATALOG.accessory) +
         '</div>' +
         '<div class="cust-actions">' +
@@ -79,7 +96,7 @@ const Customizer = {
     this._previewCtx = this._previewCanvas.getContext('2d')
   },
 
-  _buildSection(label, key, items, isColor) {
+  _buildSection(label, key, items, isColor, wide) {
     let opts = ''
     if (isColor) {
       opts = items.map(item =>
@@ -93,15 +110,17 @@ const Customizer = {
         'onclick="Customizer._pick(\'' + key + '\',\'' + item.id + '\')">' + item.label + '</button>'
       ).join('')
     }
-    return '<div class="cust-section"><div class="cust-section-label">' + label + '</div><div class="cust-options">' + opts + '</div></div>'
+    const cls = 'cust-section' + (wide ? ' cust-wide' : '')
+    return '<div class="' + cls + '"><div class="cust-section-label">' + label + '</div><div class="cust-options">' + opts + '</div></div>'
   },
 
   open() {
     if (!this._el) this.init()
-    this._tempAppearance = Object.assign({}, Player.appearance || DEFAULT_APPEARANCE)
+    this._figureMode = this._getFigureMode()
+    this._tempAppearance = Object.assign({}, this._getAppearance())
     this._open = true
     this._el.classList.add('open')
-    this._updateModeButtons(Player.figureMode)
+    this._updateModeButtons(this._figureMode)
     this._updateSelections()
     this._renderPreview()
   },
@@ -112,7 +131,9 @@ const Customizer = {
   },
 
   _setMode(mode) {
-    Player.saveFigureMode(mode)
+    this._figureMode = mode
+    localStorage.setItem('figureMode', mode)
+    if (typeof Player !== 'undefined') Player.figureMode = mode
     this._updateModeButtons(mode)
     this._renderPreview()
   },
@@ -152,32 +173,40 @@ const Customizer = {
     ctx.clearRect(0, 0, w, h)
 
     const x = w / 2
-    const y = h / 2 + 5
+    const y = h / 2 + 8
+    const scale = 2.2
 
-    if (Player.figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
+    if (this._figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.scale(scale, scale)
       const animState = { time: performance.now() / 1000, walking: false, lowHealth: false, dead: false, hitFlash: 0, attackFlash: 0 }
-      AdvancedRenderer.drawCharacter(ctx, x, y, 28, Math.PI / 2, this._tempAppearance, animState)
+      AdvancedRenderer.drawCharacter(ctx, 0, 0, 28, Math.PI / 2, this._tempAppearance, animState)
+      ctx.restore()
     } else {
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.scale(scale, scale)
       ctx.fillStyle = 'rgba(0,0,0,0.18)'
       ctx.beginPath()
-      ctx.ellipse(x, y + 20, 16, 5, 0, 0, Math.PI * 2)
+      ctx.ellipse(0, 20, 16, 5, 0, 0, Math.PI * 2)
       ctx.fill()
 
-      const grad = ctx.createRadialGradient(x - 6, y - 6, 1, x, y, 22)
+      const grad = ctx.createRadialGradient(-6, -6, 1, 0, 0, 22)
       grad.addColorStop(0, '#99ddff')
       grad.addColorStop(0.5, '#4499ff')
       grad.addColorStop(1, '#2255bb')
       ctx.fillStyle = grad
       ctx.beginPath()
-      ctx.arc(x, y, 22, 0, Math.PI * 2)
+      ctx.arc(0, 0, 22, 0, Math.PI * 2)
       ctx.fill()
       ctx.strokeStyle = '#1a1a2e'
       ctx.lineWidth = 3
       ctx.stroke()
 
       for (const side of [-1, 1]) {
-        const ex = x + side * 7
-        const ey = y - 2
+        const ex = side * 7
+        const ey = -2
         ctx.fillStyle = '#fff'
         ctx.beginPath()
         ctx.arc(ex, ey, 6, 0, Math.PI * 2)
@@ -195,13 +224,23 @@ const Customizer = {
       ctx.strokeStyle = '#1a1a2e'
       ctx.lineWidth = 2
       ctx.beginPath()
-      ctx.arc(x, y + 7, 5, 0.2, Math.PI - 0.2)
+      ctx.arc(0, 7, 5, 0.2, Math.PI - 0.2)
       ctx.stroke()
+      ctx.restore()
     }
   },
 
   _save() {
-    Player.saveAppearance(this._tempAppearance)
+    const validated = validateAppearance(this._tempAppearance)
+    localStorage.setItem('appearance', JSON.stringify(validated))
+    localStorage.setItem('figureMode', this._figureMode)
+    if (typeof Player !== 'undefined') {
+      Player.appearance = validated
+      Player.figureMode = this._figureMode
+    }
+    if (typeof mp !== 'undefined' && mp && mp.socket && mp.socket.connected) {
+      mp.socket.emit('appearance-update', { figureMode: this._figureMode, appearance: validated })
+    }
     this.close()
   },
 

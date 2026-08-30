@@ -2,6 +2,7 @@ const Game = {
   canvas: null,
   ctx: null,
   state: 'start',
+  paused: false,
   playerScore: 0,
   enemyScore: 0,
   enemies: [],
@@ -54,6 +55,21 @@ const Game = {
     UI.hideStartScreen()
     UI.hideEndScreen()
     document.getElementById('score-hud').classList.remove('hidden')
+    document.getElementById('ingame-btns').classList.remove('hidden')
+    document.getElementById('pause-overlay').classList.add('hidden')
+    this.paused = false
+  },
+
+  togglePause() {
+    if (this.state !== 'playing' && this.state !== 'respawning') return
+    this.paused = !this.paused
+    const overlay = document.getElementById('pause-overlay')
+    if (this.paused) {
+      overlay.classList.remove('hidden')
+    } else {
+      overlay.classList.add('hidden')
+      this.lastTime = performance.now()
+    }
   },
 
   loop(timestamp) {
@@ -68,7 +84,7 @@ const Game = {
       this.fpsTimer = 0
     }
 
-    if (this.state === 'playing' || this.state === 'respawning') {
+    if ((this.state === 'playing' || this.state === 'respawning') && !this.paused) {
       this.update(dt)
       this.render()
     }
@@ -157,6 +173,9 @@ const Game = {
 
   endGame(playerWon) {
     this.state = 'ended'
+    this.paused = false
+    document.getElementById('ingame-btns').classList.add('hidden')
+    document.getElementById('pause-overlay').classList.add('hidden')
     if (playerWon) {
       Sound.play('win')
     } else {

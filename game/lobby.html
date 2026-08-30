@@ -437,6 +437,7 @@
       <button id="join-btn" class="big-button" style="background:linear-gradient(135deg,#44ddff,#4488ff)">JOIN GAME</button>
       <div id="menu-error" class="status-msg error" style="display:none"></div>
       <button class="menu-account-btn" onclick="openAccountModal()"><span style="font-size:1.1rem">&#x1F464;</span> MY ACCOUNT</button>
+      <button class="menu-account-btn" style="background:linear-gradient(135deg,#44ddff,#4488ff)" onclick="Customizer.open()"><span style="font-size:1.1rem">&#x1F3AD;</span> CHARACTER</button>
     </div>
   </div>
 
@@ -483,6 +484,7 @@
       </div>
 
       <div id="lobby-error" class="status-msg error" style="display:none"></div>
+      <button class="menu-account-btn" style="background:linear-gradient(135deg,#44ddff,#4488ff);margin-top:16px" onclick="Customizer.open()"><span style="font-size:1.1rem">&#x1F3AD;</span> CHARACTER</button>
     </div>
   </div>
 
@@ -501,12 +503,19 @@
         <canvas id="mp-canvas" width="960" height="640"></canvas>
         <div id="mp-hud"></div>
         <div id="game-top-btns">
+          <button id="game-char-btn" class="game-overlay-btn" title="Character" onclick="Customizer.open()"><span class="btn-icon">&#x1F3AD;</span></button>
+          <button id="game-pause-btn" class="game-overlay-btn" title="Pause" onclick="mpTogglePause()"><span class="btn-icon">&#x23F8;</span></button>
           <button id="game-account-btn" class="game-overlay-btn" title="Account"><span class="btn-icon">&#x1F464;</span></button>
           <button id="end-game-btn" class="game-overlay-btn end-btn" title="End Game"><span class="btn-icon">&#x2716;</span></button>
         </div>
         <div id="controls-hint">
           <div class="hint-side hint-move">DRAG to MOVE</div>
           <div class="hint-side hint-shoot">TAP to SHOOT</div>
+        </div>
+        <div id="mp-pause-overlay" style="display:none;position:absolute;inset:0;background:rgba(10,10,30,0.85);z-index:30;flex-direction:column;align-items:center;justify-content:center;border-radius:8px">
+          <div style="font-size:2.5rem;font-weight:900;color:#ffd700;margin-bottom:20px">PAUSED</div>
+          <button class="game-overlay-btn" style="padding:12px 32px;font-size:1rem" onclick="mpTogglePause()"><span class="btn-icon">&#x25B6;</span> RESUME</button>
+          <button class="game-overlay-btn" style="padding:12px 32px;font-size:1rem;margin-top:10px" onclick="Customizer.open()"><span class="btn-icon">&#x1F3AD;</span> CHARACTER</button>
         </div>
       </div>
     </div>
@@ -538,6 +547,7 @@
   <script src="/game/js/appearance-catalog.js"></script>
   <script src="/game/js/animation.js"></script>
   <script src="/game/js/advanced-renderer.js"></script>
+  <script src="/game/js/customizer.js"></script>
   <script src="js/mp-client.js"></script>
 </body>
 </html>

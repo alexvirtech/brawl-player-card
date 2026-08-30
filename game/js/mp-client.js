@@ -52,6 +52,7 @@ let mp = {
   effects: [],
   notifications: [],
   lastRenderTime: 0,
+  paused: false,
 }
 
 function showScreen(id) {
@@ -82,6 +83,7 @@ function checkCodeInUrl() {
 }
 
 function init() {
+  if (typeof Customizer !== 'undefined') Customizer.init()
   const codeFromUrl = checkCodeInUrl()
   if (!mp.token) {
     showScreen('nickname')
@@ -493,6 +495,7 @@ function initGameCanvas() {
   const sendRate = 1000 / 20
   mp.inputInterval = setInterval(() => {
     if (!mp.socket || !mp.socket.connected) return
+    if (mp.paused) return
 
     let dx = 0, dy = 0
     if (mp.keys['w'] || mp.keys['arrowup']) dy -= 1
@@ -1116,6 +1119,17 @@ function playSound(type) {
 }
 
 // --- Controls Hint ---
+
+function mpTogglePause() {
+  mp.paused = !mp.paused
+  const overlay = document.getElementById('mp-pause-overlay')
+  if (mp.paused) {
+    overlay.style.display = 'flex'
+  } else {
+    overlay.style.display = 'none'
+    mp.lastRenderTime = performance.now()
+  }
+}
 
 function showControlsHint() {
   const hint = document.getElementById('controls-hint')

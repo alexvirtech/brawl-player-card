@@ -16,6 +16,19 @@
 
     <div id="score-hud" class="hidden">YOU 0 : 0 ENEMIES</div>
 
+    <div id="ingame-btns" class="hidden">
+      <button id="ingame-char-btn" class="ingame-btn" onclick="Customizer.open()"><span class="btn-icon">&#x1F3AD;</span></button>
+      <button id="ingame-pause-btn" class="ingame-btn" onclick="Game.togglePause()"><span class="btn-icon">&#x23F8;</span></button>
+    </div>
+
+    <div id="pause-overlay" class="overlay hidden">
+      <h1>PAUSED</h1>
+      <div class="start-buttons">
+        <button class="play-btn" onclick="Game.togglePause()">RESUME</button>
+        <button class="play-btn" style="background:linear-gradient(135deg,#44ddff,#4488ff);font-size:1rem" onclick="Customizer.open()">&#x1F3AD; CHARACTER</button>
+      </div>
+    </div>
+
     <!-- Start Screen -->
     <div id="start-screen" class="overlay">
       <h1>BEN BATTLE</h1>

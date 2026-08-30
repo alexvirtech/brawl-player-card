@@ -52,6 +52,46 @@
     return d.innerHTML
   }
 
+  function renderAccount(content, profile, history, token) {
+    var historyHtml = history.length === 0
+      ? '<p style="color:#666;text-align:center;padding:12px">No games played yet</p>'
+      : history.slice(0, 10).map(function(g) {
+          var won = g.myPlacement === 1
+          var date = new Date(g.createdAt).toLocaleDateString()
+          return '<div class="hist-row">' +
+            '<span class="' + (won ? 'hist-win' : 'hist-loss') + '">' + (won ? 'WIN' : '#' + g.myPlacement) + '</span>' +
+            '<span class="hist-info">' + date + ' &middot; ' + g.players.length + 'p &middot; ' + g.myKills + 'K/' + g.myDeaths + 'D</span>' +
+            '<span class="hist-pts">' + g.myScore + 'pts</span>' +
+          '</div>'
+        }).join('')
+
+    content.innerHTML =
+      '<div class="acct-header">' +
+        '<div class="acct-avatar">&#x1F3AE;</div>' +
+        '<div class="acct-name" id="acct-name-display">' +
+          '<span id="acct-nick-text">' + esc(profile.nickname) + '</span>' +
+          ' <button id="acct-edit-btn" style="background:none;border:none;color:#888;cursor:pointer;font-size:0.85rem;vertical-align:middle;padding:2px 6px" title="Edit name">&#9998;</button>' +
+        '</div>' +
+        '<div id="acct-edit-row" style="display:none;text-align:center;margin-top:6px">' +
+          '<input id="acct-nick-input" type="text" maxlength="20" style="padding:6px 10px;border:2px solid rgba(255,215,0,0.4);border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;font-size:1.1rem;font-weight:700;text-align:center;outline:none;width:150px">' +
+          '<button id="acct-save-btn" style="padding:6px 12px;border:none;border-radius:8px;background:#44dd44;color:#1a1a2e;font-weight:800;font-size:0.8rem;cursor:pointer;margin-left:4px;vertical-align:middle">SAVE</button>' +
+          '<button id="acct-cancel-btn" style="padding:6px 10px;border:none;border-radius:8px;background:rgba(255,255,255,0.1);color:#888;font-weight:700;font-size:0.8rem;cursor:pointer;margin-left:2px;vertical-align:middle">X</button>' +
+          '<div id="acct-edit-err" style="color:#ff6b6b;font-size:0.75rem;margin-top:4px;display:none"></div>' +
+        '</div>' +
+        '<div class="acct-since">Since ' + new Date(profile.createdAt).toLocaleDateString() + '</div>' +
+      '</div>' +
+      '<div class="acct-grid">' +
+        '<div class="acct-stat"><span class="acct-val">' + profile.stats.wins + '</span><span class="acct-lbl">Wins</span></div>' +
+        '<div class="acct-stat"><span class="acct-val">' + profile.stats.gamesPlayed + '</span><span class="acct-lbl">Games</span></div>' +
+        '<div class="acct-stat"><span class="acct-val">' + profile.stats.totalKills + '</span><span class="acct-lbl">Kills</span></div>' +
+        '<div class="acct-stat"><span class="acct-val">' + profile.stats.totalDeaths + '</span><span class="acct-lbl">Deaths</span></div>' +
+      '</div>' +
+      '<h3 style="margin:16px 0 8px;font-size:.9rem;color:#aaa">Recent Games</h3>' +
+      historyHtml
+
+    setupEditHandlers(token, profile.nickname)
+  }
+
   window.openAccountModal = function() {
     ensureStyles()
     ensureModal()
@@ -77,45 +117,18 @@
     ]).then(function(results) {
       var profile = results[0]
       var history = results[1]
+      try {
+        localStorage.setItem('cached-profile', JSON.stringify(profile))
+        localStorage.setItem('cached-history', JSON.stringify(history))
+      } catch(e) {}
 
-      var historyHtml = history.length === 0
-        ? '<p style="color:#666;text-align:center;padding:12px">No games played yet</p>'
-        : history.slice(0, 10).map(function(g) {
-            var won = g.myPlacement === 1
-            var date = new Date(g.createdAt).toLocaleDateString()
-            return '<div class="hist-row">' +
-              '<span class="' + (won ? 'hist-win' : 'hist-loss') + '">' + (won ? 'WIN' : '#' + g.myPlacement) + '</span>' +
-              '<span class="hist-info">' + date + ' &middot; ' + g.players.length + 'p &middot; ' + g.myKills + 'K/' + g.myDeaths + 'D</span>' +
-              '<span class="hist-pts">' + g.myScore + 'pts</span>' +
-            '</div>'
-          }).join('')
-
-      content.innerHTML =
-        '<div class="acct-header">' +
-          '<div class="acct-avatar">&#x1F3AE;</div>' +
-          '<div class="acct-name" id="acct-name-display">' +
-            '<span id="acct-nick-text">' + esc(profile.nickname) + '</span>' +
-            ' <button id="acct-edit-btn" style="background:none;border:none;color:#888;cursor:pointer;font-size:0.85rem;vertical-align:middle;padding:2px 6px" title="Edit name">&#9998;</button>' +
-          '</div>' +
-          '<div id="acct-edit-row" style="display:none;text-align:center;margin-top:6px">' +
-            '<input id="acct-nick-input" type="text" maxlength="20" style="padding:6px 10px;border:2px solid rgba(255,215,0,0.4);border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;font-size:1.1rem;font-weight:700;text-align:center;outline:none;width:150px">' +
-            '<button id="acct-save-btn" style="padding:6px 12px;border:none;border-radius:8px;background:#44dd44;color:#1a1a2e;font-weight:800;font-size:0.8rem;cursor:pointer;margin-left:4px;vertical-align:middle">SAVE</button>' +
-            '<button id="acct-cancel-btn" style="padding:6px 10px;border:none;border-radius:8px;background:rgba(255,255,255,0.1);color:#888;font-weight:700;font-size:0.8rem;cursor:pointer;margin-left:2px;vertical-align:middle">X</button>' +
-            '<div id="acct-edit-err" style="color:#ff6b6b;font-size:0.75rem;margin-top:4px;display:none"></div>' +
-          '</div>' +
-          '<div class="acct-since">Since ' + new Date(profile.createdAt).toLocaleDateString() + '</div>' +
-        '</div>' +
-        '<div class="acct-grid">' +
-          '<div class="acct-stat"><span class="acct-val">' + profile.stats.wins + '</span><span class="acct-lbl">Wins</span></div>' +
-          '<div class="acct-stat"><span class="acct-val">' + profile.stats.gamesPlayed + '</span><span class="acct-lbl">Games</span></div>' +
-          '<div class="acct-stat"><span class="acct-val">' + profile.stats.totalKills + '</span><span class="acct-lbl">Kills</span></div>' +
-          '<div class="acct-stat"><span class="acct-val">' + profile.stats.totalDeaths + '</span><span class="acct-lbl">Deaths</span></div>' +
-        '</div>' +
-        '<h3 style="margin:16px 0 8px;font-size:.9rem;color:#aaa">Recent Games</h3>' +
-        historyHtml
-
-      setupEditHandlers(token, profile.nickname)
+      renderAccount(content, profile, history, token)
     }).catch(function() {
+      try {
+        var cp = JSON.parse(localStorage.getItem('cached-profile'))
+        var ch = JSON.parse(localStorage.getItem('cached-history'))
+        if (cp) { renderAccount(content, cp, ch || [], token); return }
+      } catch(e) {}
       content.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:30px">Failed to load profile</p>'
     })
   }
