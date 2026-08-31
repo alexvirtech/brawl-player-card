@@ -42,6 +42,7 @@ const Game = {
     this.state = 'playing'
     this.playerScore = 0
     this.enemyScore = 0
+    if (typeof getRandomTheme !== 'undefined') getRandomTheme()
     Bullets.clear()
     if (typeof HazardBalls !== 'undefined') HazardBalls.init()
 

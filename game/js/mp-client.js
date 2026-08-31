@@ -422,6 +422,8 @@ function connectSocketInternal() {
     mp.prediction = { x: 0, y: 0 }
     mp.effects = []
     mp.notifications = []
+    mp.smokeTrails = []
+    if (typeof getRandomTheme !== 'undefined') getRandomTheme()
     showScreen('game')
     initGameCanvas()
     showControlsHint()
@@ -631,44 +633,23 @@ function renderGame(now) {
   const ctx = mp.ctx
   if (!ctx || !mp.snapshot) return
 
-  const ac = GAME_CONFIG.arena
-  ctx.fillStyle = ac.grassColor
-  ctx.fillRect(0, 0, 960, 640)
-
-  ctx.fillStyle = ac.grassDot
-  for (let gx = 20; gx < 960; gx += 50) {
-    for (let gy = 20; gy < 640; gy += 50) {
-      ctx.beginPath()
-      ctx.arc(gx, gy, 3, 0, Math.PI * 2)
-      ctx.fill()
-    }
+  if (typeof drawThemedArena !== 'undefined') {
+    drawThemedArena(ctx, 960, 640, ARENA_OBSTACLES)
+  } else {
+    const ac = GAME_CONFIG.arena
+    ctx.fillStyle = ac.grassColor
+    ctx.fillRect(0, 0, 960, 640)
+    ctx.strokeStyle = ac.borderColor
+    ctx.lineWidth = 6
+    ctx.strokeRect(3, 3, 954, 634)
+    ARENA_OBSTACLES.forEach(obs => {
+      ctx.fillStyle = obs.type === 'wall' ? ac.wallColor : ac.boxColor
+      ctx.fillRect(obs.x, obs.y, obs.w, obs.h)
+      ctx.strokeStyle = obs.type === 'wall' ? ac.wallStroke : ac.boxStroke
+      ctx.lineWidth = 2
+      ctx.strokeRect(obs.x, obs.y, obs.w, obs.h)
+    })
   }
-
-  ctx.strokeStyle = ac.borderColor
-  ctx.lineWidth = 6
-  ctx.strokeRect(3, 3, 954, 634)
-
-  ARENA_OBSTACLES.forEach(obs => {
-    if (obs.type === 'wall') {
-      ctx.fillStyle = ac.wallColor
-      ctx.fillRect(obs.x, obs.y, obs.w, obs.h)
-      ctx.strokeStyle = ac.wallStroke
-      ctx.lineWidth = 2
-      ctx.strokeRect(obs.x, obs.y, obs.w, obs.h)
-    } else {
-      ctx.fillStyle = ac.boxColor
-      ctx.fillRect(obs.x, obs.y, obs.w, obs.h)
-      ctx.strokeStyle = ac.boxStroke
-      ctx.lineWidth = 2
-      ctx.strokeRect(obs.x, obs.y, obs.w, obs.h)
-      ctx.beginPath()
-      ctx.moveTo(obs.x, obs.y)
-      ctx.lineTo(obs.x + obs.w, obs.y + obs.h)
-      ctx.moveTo(obs.x + obs.w, obs.y)
-      ctx.lineTo(obs.x, obs.y + obs.h)
-      ctx.stroke()
-    }
-  })
 
   const tickMs = 1000 / 20
   const elapsed = now - mp.snapshotTime

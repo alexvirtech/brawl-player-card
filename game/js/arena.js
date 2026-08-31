@@ -21,44 +21,22 @@ const Arena = {
   },
 
   draw(ctx) {
+    if (typeof drawThemedArena !== 'undefined') {
+      drawThemedArena(ctx, this.width, this.height, this.obstacles)
+      return
+    }
     const c = GAME_CONFIG.arena
-
     ctx.fillStyle = c.grassColor
     ctx.fillRect(0, 0, this.width, this.height)
-
-    ctx.fillStyle = c.grassDot
-    for (let gx = 20; gx < this.width; gx += 50) {
-      for (let gy = 20; gy < this.height; gy += 50) {
-        ctx.beginPath()
-        ctx.arc(gx, gy, 3, 0, Math.PI * 2)
-        ctx.fill()
-      }
-    }
-
     ctx.strokeStyle = c.borderColor
     ctx.lineWidth = 6
     ctx.strokeRect(3, 3, this.width - 6, this.height - 6)
-
     this.obstacles.forEach(obs => {
-      if (obs.type === 'wall') {
-        ctx.fillStyle = c.wallColor
-        ctx.fillRect(obs.x, obs.y, obs.w, obs.h)
-        ctx.strokeStyle = c.wallStroke
-        ctx.lineWidth = 2
-        ctx.strokeRect(obs.x, obs.y, obs.w, obs.h)
-      } else {
-        ctx.fillStyle = c.boxColor
-        ctx.fillRect(obs.x, obs.y, obs.w, obs.h)
-        ctx.strokeStyle = c.boxStroke
-        ctx.lineWidth = 2
-        ctx.strokeRect(obs.x, obs.y, obs.w, obs.h)
-        ctx.beginPath()
-        ctx.moveTo(obs.x, obs.y)
-        ctx.lineTo(obs.x + obs.w, obs.y + obs.h)
-        ctx.moveTo(obs.x + obs.w, obs.y)
-        ctx.lineTo(obs.x, obs.y + obs.h)
-        ctx.stroke()
-      }
+      ctx.fillStyle = obs.type === 'wall' ? c.wallColor : c.boxColor
+      ctx.fillRect(obs.x, obs.y, obs.w, obs.h)
+      ctx.strokeStyle = obs.type === 'wall' ? c.wallStroke : c.boxStroke
+      ctx.lineWidth = 2
+      ctx.strokeRect(obs.x, obs.y, obs.w, obs.h)
     })
   },
 
