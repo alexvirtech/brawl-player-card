@@ -53,6 +53,7 @@ let mp = {
   notifications: [],
   lastRenderTime: 0,
   paused: false,
+  smokeTrails: [],
 }
 
 function showScreen(id) {
@@ -673,18 +674,37 @@ function renderGame(now) {
   const elapsed = now - mp.snapshotTime
   const t = Math.min(1.2, elapsed / tickMs)
 
+  const renderDt = (now - mp.lastRenderTime) / 1000 || 0.016
+  for (let i = mp.smokeTrails.length - 1; i >= 0; i--) {
+    const s = mp.smokeTrails[i]
+    s.alpha -= renderDt * 3
+    s.size += renderDt * 8
+    if (s.alpha <= 0) { mp.smokeTrails.splice(i, 1); continue }
+    ctx.globalAlpha = Math.max(0, s.alpha)
+    ctx.fillStyle = s.color
+    ctx.beginPath()
+    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.globalAlpha = 1
+
   mp.snapshot.bullets.forEach(b => {
     const color = PLAYER_COLORS[b.colorIndex] || PLAYER_COLORS[0]
     const bx = b.x + (b.vx / 20) * t
     const by = b.y + (b.vy / 20) * t
-    ctx.fillStyle = color.bullet + '44'
-    ctx.beginPath()
-    ctx.arc(bx, by, 12, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.fillStyle = color.bullet
-    ctx.beginPath()
-    ctx.arc(bx, by, 6, 0, Math.PI * 2)
-    ctx.fill()
+    const wid = b.weaponId || 'pistol'
+    if (wid === 'rocket' || wid === 'grenade') {
+      mp.smokeTrails.push({
+        x: bx + (Math.random() - 0.5) * 4,
+        y: by + (Math.random() - 0.5) * 4,
+        alpha: 0.5,
+        size: wid === 'rocket' ? 4 : 3,
+        color: wid === 'rocket' ? '#888' : '#5a5',
+      })
+    }
+    const angle = Math.atan2(b.vy, b.vx)
+    const sz = b.size || 6
+    Bullets._drawProjectile(ctx, bx, by, sz, angle, wid, color.bullet)
   })
 
   mp.snapshot.players.forEach(p => {

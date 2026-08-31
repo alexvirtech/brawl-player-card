@@ -36,6 +36,15 @@ export const GAME_CFG = {
   disconnectGrace: 20000,
 }
 
+export const WEAPONS = {
+  pistol:  { damage: 25, speed: 500, cooldown: 300,  size: 6,  range: 2000, pellets: 1, spread: 0 },
+  shotgun: { damage: 15, speed: 450, cooldown: 600,  size: 5,  range: 800,  pellets: 4, spread: 0.25 },
+  blaster: { damage: 20, speed: 600, cooldown: 250,  size: 7,  range: 2000, pellets: 1, spread: 0 },
+  rocket:  { damage: 45, speed: 300, cooldown: 1200, size: 10, range: 2000, pellets: 1, spread: 0 },
+  bat:     { damage: 35, speed: 0,   cooldown: 500,  size: 0,  range: 55,   pellets: 0, spread: 0, melee: true },
+  grenade: { damage: 40, speed: 350, cooldown: 1500, size: 8,  range: 1200, pellets: 1, spread: 0 },
+}
+
 export const SPAWN_POINTS = [
   { x: 100, y: 320 },
   { x: 860, y: 320 },

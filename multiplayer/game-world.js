@@ -1,4 +1,4 @@
-import { ARENA, PLAYER_CFG, BULLET_CFG, GAME_CFG, SPAWN_POINTS } from './game-config.js'
+import { ARENA, PLAYER_CFG, BULLET_CFG, GAME_CFG, SPAWN_POINTS, WEAPONS } from './game-config.js'
 import { validateServerAppearance, validateFigureMode } from './appearance-validation.js'
 
 function pushOut(cx, cy, radius) {
@@ -121,21 +121,36 @@ export class GameWorld {
 
       p.angle = p.input.angle
 
+      const weaponId = (p.appearance && p.appearance.weapon) || 'pistol'
+      const w = WEAPONS[weaponId] || WEAPONS.pistol
+
       p.shootTimer -= dt * 1000
       if (p.input.shooting && p.shootTimer <= 0) {
-        const bx = p.x + Math.cos(p.angle) * (PLAYER_CFG.size + 8)
-        const by = p.y + Math.sin(p.angle) * (PLAYER_CFG.size + 8)
-        this.bullets.push({
-          id: this.nextBulletId++,
-          x: bx,
-          y: by,
-          vx: Math.cos(p.angle) * BULLET_CFG.speed,
-          vy: Math.sin(p.angle) * BULLET_CFG.speed,
-          ownerId: p.id,
-          colorIndex: p.colorIndex,
-          life: BULLET_CFG.lifetime,
-        })
-        p.shootTimer = PLAYER_CFG.shootCooldown
+        if (w.melee) {
+          this._meleeHit(p, w)
+        } else {
+          const pellets = w.pellets || 1
+          for (let pi = 0; pi < pellets; pi++) {
+            const spread = pellets > 1 ? (pi - (pellets - 1) / 2) * w.spread : 0
+            const a = p.angle + spread
+            const bx = p.x + Math.cos(a) * (PLAYER_CFG.size + 8)
+            const by = p.y + Math.sin(a) * (PLAYER_CFG.size + 8)
+            this.bullets.push({
+              id: this.nextBulletId++,
+              x: bx,
+              y: by,
+              vx: Math.cos(a) * w.speed,
+              vy: Math.sin(a) * w.speed,
+              size: w.size,
+              damage: w.damage,
+              ownerId: p.id,
+              colorIndex: p.colorIndex,
+              weaponId,
+              life: (w.range / w.speed) * 1000,
+            })
+          }
+        }
+        p.shootTimer = w.cooldown
       }
     }
 
@@ -159,8 +174,8 @@ export class GameWorld {
         const dy = b.y - p.y
         const dist = Math.sqrt(dx * dx + dy * dy)
 
-        if (dist < PLAYER_CFG.size + BULLET_CFG.size) {
-          p.health -= BULLET_CFG.damage
+        if (dist < PLAYER_CFG.size + (b.size || BULLET_CFG.size)) {
+          p.health -= (b.damage || BULLET_CFG.damage)
           this.bullets.splice(i, 1)
 
           if (p.health <= 0) {
@@ -180,6 +195,35 @@ export class GameWorld {
             }
           }
           break
+        }
+      }
+    }
+  }
+
+  _meleeHit(attacker, w) {
+    const range = w.range || 55
+    const arc = 1.2
+    for (const p of this.players.values()) {
+      if (!p.alive || p.id === attacker.id) continue
+      const dx = p.x - attacker.x
+      const dy = p.y - attacker.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      if (dist > range) continue
+      let diff = Math.atan2(dy, dx) - attacker.angle
+      while (diff > Math.PI) diff -= Math.PI * 2
+      while (diff < -Math.PI) diff += Math.PI * 2
+      if (Math.abs(diff) < arc / 2) {
+        p.health -= w.damage
+        if (p.health <= 0) {
+          p.health = 0
+          p.alive = false
+          p.deaths++
+          p.respawnTimer = GAME_CFG.respawnDelay
+          attacker.kills++
+          attacker.score++
+          if (attacker.score >= this.winningScore) {
+            this.winner = attacker.id
+          }
         }
       }
     }
@@ -221,8 +265,10 @@ export class GameWorld {
       y: Math.round(b.y * 10) / 10,
       vx: Math.round(b.vx),
       vy: Math.round(b.vy),
+      size: b.size,
       ownerId: b.ownerId,
       colorIndex: b.colorIndex,
+      weaponId: b.weaponId,
     }))
 
     return { tick: this.tick, players, bullets, winner: this.winner }

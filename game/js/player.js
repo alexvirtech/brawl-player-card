@@ -83,13 +83,21 @@ const Player = {
       this.angle = Math.atan2(Input.mouse.y - this.y, Input.mouse.x - this.x)
     }
 
+    const weaponId = this.appearance ? this.appearance.weapon : 'pistol'
+    const weapon = typeof getWeapon !== 'undefined' ? getWeapon(weaponId) : null
+    const cooldown = weapon ? weapon.cooldown : cfg.shootCooldown
+
     this.shootTimer -= dt * 1000
     const shooting = Input.mouse.down || Input.isDown(' ') || Input.touch.shooting
     if (shooting && this.shootTimer <= 0) {
-      const bx = this.x + Math.cos(this.angle) * (cfg.size + 8)
-      const by = this.y + Math.sin(this.angle) * (cfg.size + 8)
-      Bullets.create(bx, by, Math.cos(this.angle), Math.sin(this.angle), true)
-      this.shootTimer = cfg.shootCooldown
+      if (weapon && weapon.type === 'melee') {
+        this._meleeAttack(weapon)
+      } else {
+        const bx = this.x + Math.cos(this.angle) * (cfg.size + 8)
+        const by = this.y + Math.sin(this.angle) * (cfg.size + 8)
+        Bullets.create(bx, by, Math.cos(this.angle), Math.sin(this.angle), true, weaponId)
+      }
+      this.shootTimer = cooldown
       if (this.anim) this.anim.triggerAttack()
       Sound.play('shoot')
     }
@@ -108,6 +116,36 @@ const Player = {
         speed: this._speed,
       })
     }
+  },
+
+  _meleeAttack(weapon) {
+    const range = weapon.range || 55
+    const arc = weapon.swingArc || 1.2
+    Game.enemies.forEach(e => {
+      if (!e.alive) return
+      const dx = e.x - this.x
+      const dy = e.y - this.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      if (dist > range) return
+      const a = Math.atan2(dy, dx)
+      let diff = a - this.angle
+      while (diff > Math.PI) diff -= Math.PI * 2
+      while (diff < -Math.PI) diff += Math.PI * 2
+      if (Math.abs(diff) < arc / 2) {
+        e.takeDamage(weapon.damage)
+        Effects.create(e.x, e.y, weapon.color)
+        if (!e.alive) {
+          Game.playerScore++
+          UI.updateScore(Game.playerScore, Game.enemyScore)
+          Sound.play('score')
+          if (Game.playerScore >= GAME_CONFIG.game.winningScore) {
+            Game.endGame(true)
+          } else {
+            e.startRespawn()
+          }
+        }
+      }
+    })
   },
 
   takeDamage(amount) {

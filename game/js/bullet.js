@@ -29,27 +29,57 @@ const Effects = {
 
 const Bullets = {
   list: [],
+  _smokeTrails: [],
 
   clear() {
     this.list = []
+    this._smokeTrails = []
     Effects.list = []
   },
 
-  create(x, y, dirX, dirY, isPlayer) {
-    const cfg = GAME_CONFIG.bullet
+  create(x, y, dirX, dirY, isPlayer, weaponId) {
     const len = Math.sqrt(dirX * dirX + dirY * dirY)
     if (len === 0) return
 
+    const w = weaponId ? getWeapon(weaponId) : null
+    const cfg = GAME_CONFIG.bullet
+
+    const speed = w ? w.speed : cfg.speed
+    const damage = w ? w.damage : (isPlayer ? cfg.playerDamage : cfg.enemyDamage)
+    const size = w ? w.size : cfg.size
+    const color = w ? w.color : (isPlayer ? cfg.playerColor : cfg.enemyColor)
+    const angle = Math.atan2(dirY, dirX)
+
+    if (w && w.pellets && w.pellets > 1) {
+      for (let i = 0; i < w.pellets; i++) {
+        const spread = (i - (w.pellets - 1) / 2) * w.spread
+        const a = angle + spread
+        this.list.push({
+          x, y,
+          vx: Math.cos(a) * speed,
+          vy: Math.sin(a) * speed,
+          size: size,
+          damage: damage,
+          color: color,
+          isPlayer, weaponId: w.id,
+          angle: a,
+          life: (w.range / speed) * 1000,
+        })
+      }
+      return
+    }
+
     this.list.push({
-      x,
-      y,
-      vx: (dirX / len) * cfg.speed,
-      vy: (dirY / len) * cfg.speed,
-      size: cfg.size,
-      damage: isPlayer ? cfg.playerDamage : cfg.enemyDamage,
-      color: isPlayer ? cfg.playerColor : cfg.enemyColor,
+      x, y,
+      vx: (dirX / len) * speed,
+      vy: (dirY / len) * speed,
+      size,
+      damage,
+      color,
       isPlayer,
-      life: cfg.lifetime,
+      weaponId: w ? w.id : 'pistol',
+      angle,
+      life: w ? (w.range / speed) * 1000 : cfg.lifetime,
     })
   },
 
@@ -59,6 +89,16 @@ const Bullets = {
       b.x += b.vx * dt
       b.y += b.vy * dt
       b.life -= dt * 1000
+
+      if (b.weaponId === 'rocket' || b.weaponId === 'grenade') {
+        this._smokeTrails.push({
+          x: b.x + (Math.random() - 0.5) * 4,
+          y: b.y + (Math.random() - 0.5) * 4,
+          alpha: 0.5,
+          size: b.weaponId === 'rocket' ? 4 : 3,
+          color: b.weaponId === 'rocket' ? '#888' : '#5a5',
+        })
+      }
 
       if (
         b.life <= 0 ||
@@ -73,22 +113,164 @@ const Bullets = {
       }
     }
 
+    for (let i = this._smokeTrails.length - 1; i >= 0; i--) {
+      const s = this._smokeTrails[i]
+      s.alpha -= dt * 3
+      s.size += dt * 8
+      if (s.alpha <= 0) this._smokeTrails.splice(i, 1)
+    }
+
     Effects.update(dt)
   },
 
   draw(ctx) {
-    this.list.forEach(b => {
-      ctx.fillStyle = b.color + '44'
+    this._smokeTrails.forEach(s => {
+      ctx.globalAlpha = Math.max(0, s.alpha)
+      ctx.fillStyle = s.color
       ctx.beginPath()
-      ctx.arc(b.x, b.y, b.size * 2, 0, Math.PI * 2)
+      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2)
       ctx.fill()
+    })
+    ctx.globalAlpha = 1
 
-      ctx.fillStyle = b.color
-      ctx.beginPath()
-      ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2)
-      ctx.fill()
+    this.list.forEach(b => {
+      Bullets._drawProjectile(ctx, b.x, b.y, b.size, b.angle, b.weaponId, b.color)
     })
 
     Effects.draw(ctx)
+  },
+
+  _drawProjectile(ctx, x, y, size, angle, weaponId, color) {
+    switch (weaponId) {
+      case 'pistol':
+        ctx.fillStyle = color + '44'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 1.8, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(x, y, size, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = '#fff'
+        ctx.beginPath()
+        ctx.arc(x - Math.cos(angle) * size * 0.2, y - Math.sin(angle) * size * 0.2, size * 0.35, 0, Math.PI * 2)
+        ctx.fill()
+        break
+
+      case 'shotgun':
+        ctx.fillStyle = color + '66'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 1.4, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(x, y, size * 0.8, 0, Math.PI * 2)
+        ctx.fill()
+        break
+
+      case 'blaster':
+        ctx.save()
+        ctx.shadowColor = color
+        ctx.shadowBlur = 12
+        ctx.fillStyle = color + '33'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 2, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.ellipse(x, y, size * 1.3, size * 0.7, angle, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = '#fff'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 0.35, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.restore()
+        break
+
+      case 'rocket':
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.rotate(angle)
+        ctx.fillStyle = '#aa2222'
+        ctx.beginPath()
+        ctx.moveTo(size * 1.4, 0)
+        ctx.lineTo(-size, -size * 0.55)
+        ctx.lineTo(-size, size * 0.55)
+        ctx.closePath()
+        ctx.fill()
+        ctx.fillStyle = '#cc4444'
+        ctx.beginPath()
+        ctx.moveTo(size * 1.4, 0)
+        ctx.lineTo(-size * 0.3, -size * 0.4)
+        ctx.lineTo(-size * 0.3, size * 0.4)
+        ctx.closePath()
+        ctx.fill()
+        ctx.fillStyle = '#666'
+        ctx.beginPath()
+        ctx.moveTo(-size, -size * 0.55)
+        ctx.lineTo(-size * 1.2, -size * 0.8)
+        ctx.lineTo(-size * 0.7, -size * 0.35)
+        ctx.closePath()
+        ctx.fill()
+        ctx.beginPath()
+        ctx.moveTo(-size, size * 0.55)
+        ctx.lineTo(-size * 1.2, size * 0.8)
+        ctx.lineTo(-size * 0.7, size * 0.35)
+        ctx.closePath()
+        ctx.fill()
+        ctx.fillStyle = '#ff6622'
+        ctx.beginPath()
+        ctx.moveTo(-size, 0)
+        ctx.lineTo(-size * 1.6, -size * 0.35)
+        ctx.lineTo(-size * 1.6, size * 0.35)
+        ctx.closePath()
+        ctx.fill()
+        ctx.fillStyle = '#ffcc22'
+        ctx.beginPath()
+        ctx.moveTo(-size, 0)
+        ctx.lineTo(-size * 1.3, -size * 0.2)
+        ctx.lineTo(-size * 1.3, size * 0.2)
+        ctx.closePath()
+        ctx.fill()
+        ctx.restore()
+        break
+
+      case 'grenade':
+        ctx.fillStyle = '#2a6a2a'
+        ctx.beginPath()
+        ctx.arc(x, y, size, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = '#44aa44'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 0.75, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.strokeStyle = '#1a4a1a'
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.moveTo(x, y - size * 0.3)
+        ctx.lineTo(x, y + size * 0.3)
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.moveTo(x - size * 0.3, y)
+        ctx.lineTo(x + size * 0.3, y)
+        ctx.stroke()
+        ctx.fillStyle = '#666'
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.rotate(angle)
+        ctx.fillRect(size * 0.6, -2, size * 0.5, 4)
+        ctx.restore()
+        break
+
+      default:
+        ctx.fillStyle = color + '44'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 2, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(x, y, size, 0, Math.PI * 2)
+        ctx.fill()
+    }
   },
 }
