@@ -90,13 +90,13 @@ const Bullets = {
       b.y += b.vy * dt
       b.life -= dt * 1000
 
-      if (b.weaponId === 'rocket' || b.weaponId === 'grenade') {
+      if (b.weaponId === 'rocket' || b.weaponId === 'grenade' || b.weaponId === 'flamethrower') {
         this._smokeTrails.push({
           x: b.x + (Math.random() - 0.5) * 4,
           y: b.y + (Math.random() - 0.5) * 4,
-          alpha: 0.5,
-          size: b.weaponId === 'rocket' ? 4 : 3,
-          color: b.weaponId === 'rocket' ? '#888' : '#5a5',
+          alpha: b.weaponId === 'flamethrower' ? 0.4 : 0.5,
+          size: b.weaponId === 'rocket' ? 4 : b.weaponId === 'flamethrower' ? 5 : 3,
+          color: b.weaponId === 'rocket' ? '#888' : b.weaponId === 'flamethrower' ? '#ff4400' : '#5a5',
         })
       }
 
@@ -259,6 +259,63 @@ const Bullets = {
         ctx.translate(x, y)
         ctx.rotate(angle)
         ctx.fillRect(size * 0.6, -2, size * 0.5, 4)
+        ctx.restore()
+        break
+
+      case 'sniper':
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.rotate(angle)
+        ctx.fillStyle = '#ff2244'
+        ctx.fillRect(-size * 2, -size * 0.3, size * 4, size * 0.6)
+        ctx.fillStyle = '#ff6688'
+        ctx.fillRect(-size, -size * 0.15, size * 2, size * 0.3)
+        ctx.restore()
+        break
+
+      case 'smg':
+        ctx.fillStyle = color + '55'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 1.5, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(x, y, size * 0.7, 0, Math.PI * 2)
+        ctx.fill()
+        break
+
+      case 'crossbow':
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.rotate(angle)
+        ctx.fillStyle = '#aa6633'
+        ctx.fillRect(-size * 0.5, -size * 0.15, size * 2.5, size * 0.3)
+        ctx.fillStyle = '#886633'
+        ctx.beginPath()
+        ctx.moveTo(size * 2, 0)
+        ctx.lineTo(size * 1.5, -size * 0.6)
+        ctx.lineTo(size * 1.5, size * 0.6)
+        ctx.closePath()
+        ctx.fill()
+        ctx.restore()
+        break
+
+      case 'flamethrower':
+        ctx.save()
+        ctx.globalAlpha = 0.7
+        ctx.fillStyle = '#ff6622'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 1.2, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = '#ffaa22'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 0.7, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = '#ffdd44'
+        ctx.beginPath()
+        ctx.arc(x, y, size * 0.3, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.globalAlpha = 1
         ctx.restore()
         break
 

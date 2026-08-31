@@ -43,6 +43,7 @@ const Game = {
     this.playerScore = 0
     this.enemyScore = 0
     Bullets.clear()
+    if (typeof HazardBalls !== 'undefined') HazardBalls.init()
 
     Player.spawn()
 
@@ -108,6 +109,7 @@ const Game = {
 
     this.enemies.forEach(e => e.update(dt))
     Bullets.update(dt)
+    if (typeof HazardBalls !== 'undefined') HazardBalls.update(dt)
     this.checkCollisions()
   },
 
@@ -193,6 +195,7 @@ const Game = {
     }
 
     this.enemies.forEach(e => e.draw(ctx))
+    if (typeof HazardBalls !== 'undefined') HazardBalls.draw(ctx)
     Bullets.draw(ctx)
 
     UI.drawJoystick(ctx)

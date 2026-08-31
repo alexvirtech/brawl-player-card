@@ -693,19 +693,60 @@ function renderGame(now) {
     const bx = b.x + (b.vx / 20) * t
     const by = b.y + (b.vy / 20) * t
     const wid = b.weaponId || 'pistol'
-    if (wid === 'rocket' || wid === 'grenade') {
+    if (wid === 'rocket' || wid === 'grenade' || wid === 'flamethrower') {
       mp.smokeTrails.push({
         x: bx + (Math.random() - 0.5) * 4,
         y: by + (Math.random() - 0.5) * 4,
-        alpha: 0.5,
-        size: wid === 'rocket' ? 4 : 3,
-        color: wid === 'rocket' ? '#888' : '#5a5',
+        alpha: wid === 'flamethrower' ? 0.4 : 0.5,
+        size: wid === 'rocket' ? 4 : wid === 'flamethrower' ? 5 : 3,
+        color: wid === 'rocket' ? '#888' : wid === 'flamethrower' ? '#ff4400' : '#5a5',
       })
     }
     const angle = Math.atan2(b.vy, b.vx)
     const sz = b.size || 6
     Bullets._drawProjectile(ctx, bx, by, sz, angle, wid, color.bullet)
   })
+
+  if (mp.snapshot.hazardBalls) {
+    const ballSize = 14
+    mp.snapshot.hazardBalls.forEach(h => {
+      const hx = h.x + (h.vx / 20) * t
+      const hy = h.y + (h.vy / 20) * t
+      const pulse = 1 + Math.sin(now / 250) * 0.08
+
+      ctx.fillStyle = 'rgba(0,0,0,0.2)'
+      ctx.beginPath()
+      ctx.ellipse(hx, hy + ballSize * 0.8, ballSize * 0.6, ballSize * 0.2, 0, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.save()
+      ctx.shadowColor = h.color
+      ctx.shadowBlur = 12
+      const grad = ctx.createRadialGradient(hx - ballSize * 0.3, hy - ballSize * 0.3, ballSize * 0.1, hx, hy, ballSize * pulse)
+      grad.addColorStop(0, '#ffffff')
+      grad.addColorStop(0.3, h.color)
+      grad.addColorStop(1, h.color + '88')
+      ctx.fillStyle = grad
+      ctx.beginPath()
+      ctx.arc(hx, hy, ballSize * pulse, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = '#ffffff44'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      ctx.restore()
+
+      ctx.fillStyle = '#ffffff'
+      ctx.beginPath()
+      ctx.arc(hx - ballSize * 0.3, hy - ballSize * 0.3, ballSize * 0.2, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold ' + (ballSize * 0.8) + 'px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('!', hx + 1, hy + 1)
+    })
+  }
 
   mp.snapshot.players.forEach(p => {
     if (!p.alive) {

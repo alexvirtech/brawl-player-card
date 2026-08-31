@@ -29,12 +29,16 @@ const AdvancedRenderer = {
     this._drawBody(ctx, x, y - size * 0.05 + bounce, size, shirt, bw, bh, isHit)
     this._drawBackArm(ctx, x, y + bounce, size, angle, skin, bw)
     if (acc.type === 'backpack') this._drawBackpack(ctx, x, y + bounce, size, acc)
+    if (acc.type === 'cape') this._drawCape(ctx, x, y + bounce, size, acc, anim)
     this._drawWeapon(ctx, x, y + bounce, size, angle, weapon, anim)
     this._drawFrontArm(ctx, x, y + bounce, size, angle, skin, bw)
     this._drawHead(ctx, x, y - size * 0.4 + bounce + breathe, size, skin, face, isLow, isHit, angle, anim)
     this._drawHairHat(ctx, x, y - size * 0.4 + bounce + breathe, size, hair)
     if (acc.type === 'glasses' || acc.type === 'sunglasses') this._drawGlasses(ctx, x, y - size * 0.4 + bounce + breathe, size, acc)
     if (acc.type === 'scarf') this._drawScarf(ctx, x, y - size * 0.05 + bounce, size, acc)
+    if (acc.type === 'medal') this._drawMedal(ctx, x, y + bounce, size, acc)
+    if (acc.type === 'chain') this._drawChain(ctx, x, y + bounce, size, acc)
+    if (acc.type === 'bandolier') this._drawBandolier(ctx, x, y + bounce, size, acc)
 
     if (isDead) {
       ctx.restore()
@@ -187,6 +191,94 @@ const AdvancedRenderer = {
       ctx.fillRect(12, -6, 3, 4)
     }
 
+    if (weapon.id === 'sniper') {
+      ctx.fillStyle = '#445566'
+      ctx.fillRect(-2, -3, 28, 6)
+      ctx.strokeRect(-2, -3, 28, 6)
+      ctx.fillStyle = '#556677'
+      ctx.fillRect(-2, -4, 8, 8)
+      ctx.strokeRect(-2, -4, 8, 8)
+      ctx.fillStyle = '#88aacc'
+      ctx.beginPath()
+      ctx.arc(20, -5, 3, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+    } else if (weapon.id === 'smg') {
+      ctx.fillStyle = '#555555'
+      ctx.fillRect(0, -3, 12, 6)
+      ctx.strokeRect(0, -3, 12, 6)
+      ctx.fillStyle = '#444444'
+      ctx.fillRect(2, 1, 4, 5)
+      ctx.strokeRect(2, 1, 4, 5)
+      ctx.fillStyle = '#666666'
+      ctx.fillRect(10, -2, 4, 4)
+      ctx.strokeRect(10, -2, 4, 4)
+    } else if (weapon.id === 'crossbow') {
+      ctx.fillStyle = '#886644'
+      ctx.fillRect(-2, -2, 16, 4)
+      ctx.strokeRect(-2, -2, 16, 4)
+      ctx.fillStyle = '#665533'
+      ctx.beginPath()
+      ctx.moveTo(6, -2)
+      ctx.lineTo(2, -10)
+      ctx.lineTo(4, -10)
+      ctx.lineTo(8, -2)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(6, 2)
+      ctx.lineTo(2, 10)
+      ctx.lineTo(4, 10)
+      ctx.lineTo(8, 2)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+    } else if (weapon.id === 'flamethrower') {
+      ctx.fillStyle = '#556655'
+      ctx.fillRect(-4, -4, 20, 8)
+      ctx.strokeRect(-4, -4, 20, 8)
+      ctx.fillStyle = '#ff6622'
+      ctx.beginPath()
+      ctx.arc(18, 0, 4, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = '#ffcc22'
+      ctx.beginPath()
+      ctx.arc(18, 0, 2, 0, Math.PI * 2)
+      ctx.fill()
+    } else if (weapon.id === 'sword') {
+      const swingAngle = (anim.attackFlash > 0) ? Math.sin(anim.attackFlash * 8) * 0.6 : 0
+      ctx.rotate(swingAngle)
+      ctx.fillStyle = '#aaaacc'
+      ctx.fillRect(0, -2, 24, 4)
+      ctx.strokeRect(0, -2, 24, 4)
+      ctx.fillStyle = '#ddddee'
+      ctx.beginPath()
+      ctx.moveTo(24, -3)
+      ctx.lineTo(28, 0)
+      ctx.lineTo(24, 3)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      ctx.fillStyle = '#886633'
+      ctx.fillRect(-2, -4, 4, 8)
+      ctx.strokeRect(-2, -4, 4, 8)
+      ctx.fillStyle = '#ffd700'
+      ctx.fillRect(-1, -5, 2, 10)
+    } else if (weapon.id === 'hammer') {
+      const swingAngle = (anim.attackFlash > 0) ? Math.sin(anim.attackFlash * 6) * 0.7 : 0
+      ctx.rotate(swingAngle)
+      ctx.fillStyle = '#886633'
+      ctx.fillRect(0, -2, 16, 4)
+      ctx.strokeRect(0, -2, 16, 4)
+      ctx.fillStyle = '#888888'
+      ctx.fillRect(14, -7, 10, 14)
+      ctx.strokeRect(14, -7, 10, 14)
+      ctx.fillStyle = '#666666'
+      ctx.fillRect(14, -7, 10, 4)
+      ctx.strokeRect(14, -7, 10, 4)
+    }
+
     if (anim.attackFlash > 0 && weapon.type === 'projectile' && weapon.id !== 'grenade') {
       ctx.fillStyle = 'rgba(255,200,50,0.6)'
       ctx.beginPath()
@@ -299,6 +391,14 @@ const AdvancedRenderer = {
       ctx.ellipse(x, mouthY, r * 0.2, r * 0.15, 0, 0, Math.PI * 2)
       ctx.fill()
       ctx.stroke()
+    } else if (face.mouth === 'frown') {
+      ctx.beginPath()
+      ctx.arc(x, mouthY + 6, r * 0.25, Math.PI + 0.2, -0.2)
+      ctx.stroke()
+    } else if (face.mouth === 'smirk') {
+      ctx.beginPath()
+      ctx.arc(x + r * 0.1, mouthY - 1, r * 0.2, 0.2, Math.PI - 0.5)
+      ctx.stroke()
     } else {
       ctx.beginPath()
       ctx.moveTo(x - r * 0.2, mouthY)
@@ -367,6 +467,49 @@ const AdvancedRenderer = {
         ctx.fill()
         ctx.stroke()
       }
+    } else if (hair.type === 'crown') {
+      ctx.fillStyle = hair.color
+      ctx.beginPath()
+      ctx.moveTo(x - r, y - 4)
+      ctx.lineTo(x - r + 3, y - r - 6)
+      ctx.lineTo(x - r / 2, y - r + 2)
+      ctx.lineTo(x, y - r - 8)
+      ctx.lineTo(x + r / 2, y - r + 2)
+      ctx.lineTo(x + r - 3, y - r - 6)
+      ctx.lineTo(x + r, y - 4)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      ctx.fillStyle = '#ff2222'
+      ctx.beginPath()
+      ctx.arc(x, y - r - 2, 2.5, 0, Math.PI * 2)
+      ctx.fill()
+    } else if (hair.type === 'bandana') {
+      ctx.fillStyle = hair.color
+      ctx.beginPath()
+      ctx.arc(x, y - 2, r + 1, Math.PI * 0.95, Math.PI * 2.05)
+      ctx.fill()
+      ctx.stroke()
+      ctx.fillStyle = this._darken(hair.color, 25)
+      ctx.fillRect(x - r - 2, y - 3, r * 2 + 4, 5)
+      ctx.strokeRect(x - r - 2, y - 3, r * 2 + 4, 5)
+      ctx.fillStyle = hair.color
+      ctx.beginPath()
+      ctx.moveTo(x + r, y - 1)
+      ctx.lineTo(x + r + 10, y + 4)
+      ctx.lineTo(x + r + 8, y + 8)
+      ctx.lineTo(x + r - 2, y + 2)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+    } else if (hair.type === 'tophat') {
+      ctx.fillStyle = hair.color
+      ctx.fillRect(x - 8, y - r - 16, 16, 16)
+      ctx.strokeRect(x - 8, y - r - 16, 16, 16)
+      ctx.fillRect(x - r - 2, y - r - 2, r * 2 + 4, 5)
+      ctx.strokeRect(x - r - 2, y - r - 2, r * 2 + 4, 5)
+      ctx.fillStyle = this._darken(hair.color, 15)
+      ctx.fillRect(x - 7, y - r - 7, 14, 3)
     }
   },
 
@@ -418,6 +561,64 @@ const AdvancedRenderer = {
     ctx.stroke()
     ctx.fillRect(x + 6, y - 6, 4, 12)
     ctx.strokeRect(x + 6, y - 6, 4, 12)
+  },
+
+  _drawCape(ctx, x, y, size, acc, anim) {
+    const sway = anim.walking ? Math.sin((anim.time || 0) * 8) * 3 : 0
+    ctx.fillStyle = acc.color
+    ctx.strokeStyle = '#1a1a2e'
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.moveTo(x - 10, y - 6)
+    ctx.quadraticCurveTo(x - 14 + sway, y + 14, x - 8 + sway, y + 22)
+    ctx.lineTo(x + 8 + sway, y + 22)
+    ctx.quadraticCurveTo(x + 14 + sway, y + 14, x + 10, y - 6)
+    ctx.closePath()
+    ctx.fill()
+    ctx.stroke()
+  },
+
+  _drawMedal(ctx, x, y, size, acc) {
+    ctx.strokeStyle = acc.color
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.moveTo(x - 3, y - 10)
+    ctx.lineTo(x, y - 4)
+    ctx.lineTo(x + 3, y - 10)
+    ctx.stroke()
+    ctx.fillStyle = acc.color
+    ctx.beginPath()
+    ctx.arc(x, y - 2, 4, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.strokeStyle = '#1a1a2e'
+    ctx.stroke()
+  },
+
+  _drawChain(ctx, x, y, size, acc) {
+    ctx.strokeStyle = acc.color
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(x, y - 6, 12, 0.3, Math.PI - 0.3)
+    ctx.stroke()
+    ctx.fillStyle = acc.color
+    ctx.beginPath()
+    ctx.arc(x, y + 4, 3, 0, Math.PI * 2)
+    ctx.fill()
+  },
+
+  _drawBandolier(ctx, x, y, size, acc) {
+    ctx.strokeStyle = acc.color
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    ctx.moveTo(x - 12, y - 10)
+    ctx.lineTo(x + 12, y + 6)
+    ctx.stroke()
+    for (let i = 0; i < 4; i++) {
+      const bx = x - 10 + i * 6
+      const by = y - 8 + i * 4
+      ctx.fillStyle = '#aa8833'
+      ctx.fillRect(bx - 1.5, by - 2, 3, 5)
+    }
   },
 
   _lighten(hex, amount) {

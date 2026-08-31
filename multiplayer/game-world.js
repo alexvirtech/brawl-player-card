@@ -43,10 +43,13 @@ export class GameWorld {
   constructor(playerSlots) {
     this.players = new Map()
     this.bullets = []
+    this.hazardBalls = []
     this.tick = 0
     this.winningScore = GAME_CFG.winningScore
     this.winner = null
     this.nextBulletId = 1
+
+    this._initHazardBalls()
 
     for (const slot of playerSlots) {
       const sp = SPAWN_POINTS[slot.colorIndex % SPAWN_POINTS.length]
@@ -198,6 +201,83 @@ export class GameWorld {
         }
       }
     }
+
+    this._updateHazardBalls(dt)
+  }
+
+  _initHazardBalls() {
+    const colors = ['#ff3366', '#ff9922', '#aa22ff']
+    for (let i = 0; i < 3; i++) {
+      const angle = Math.random() * Math.PI * 2
+      const speed = 180
+      this.hazardBalls.push({
+        x: 200 + Math.random() * 560,
+        y: 150 + Math.random() * 340,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        color: colors[i],
+        hitTimers: {},
+      })
+    }
+  }
+
+  _updateHazardBalls(dt) {
+    const ballSize = 14
+    const damage = 15
+    const cooldown = 800
+
+    for (const ball of this.hazardBalls) {
+      ball.x += ball.vx * dt
+      ball.y += ball.vy * dt
+
+      if (ball.x - ballSize < 4) { ball.x = ballSize + 4; ball.vx = Math.abs(ball.vx) }
+      if (ball.x + ballSize > ARENA.width - 4) { ball.x = ARENA.width - ballSize - 4; ball.vx = -Math.abs(ball.vx) }
+      if (ball.y - ballSize < 4) { ball.y = ballSize + 4; ball.vy = Math.abs(ball.vy) }
+      if (ball.y + ballSize > ARENA.height - 4) { ball.y = ARENA.height - ballSize - 4; ball.vy = -Math.abs(ball.vy) }
+
+      for (const obs of ARENA.obstacles) {
+        const nearX = Math.max(obs.x, Math.min(ball.x, obs.x + obs.w))
+        const nearY = Math.max(obs.y, Math.min(ball.y, obs.y + obs.h))
+        const dx = ball.x - nearX
+        const dy = ball.y - nearY
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < ballSize) {
+          if (dist === 0) {
+            ball.x = obs.x - ballSize
+            ball.vx = -Math.abs(ball.vx)
+          } else {
+            const push = ballSize - dist
+            ball.x += (dx / dist) * push
+            ball.y += (dy / dist) * push
+            const dot = ball.vx * dx + ball.vy * dy
+            ball.vx -= 2 * dot / (dist * dist) * dx
+            ball.vy -= 2 * dot / (dist * dist) * dy
+          }
+        }
+      }
+
+      for (const key in ball.hitTimers) {
+        ball.hitTimers[key] -= dt * 1000
+        if (ball.hitTimers[key] <= 0) delete ball.hitTimers[key]
+      }
+
+      for (const p of this.players.values()) {
+        if (!p.alive) continue
+        const dx = ball.x - p.x
+        const dy = ball.y - p.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < ballSize + PLAYER_CFG.size && !ball.hitTimers[p.id]) {
+          p.health -= damage
+          ball.hitTimers[p.id] = cooldown
+          if (p.health <= 0) {
+            p.health = 0
+            p.alive = false
+            p.deaths++
+            p.respawnTimer = GAME_CFG.respawnDelay
+          }
+        }
+      }
+    }
   }
 
   _meleeHit(attacker, w) {
@@ -271,7 +351,15 @@ export class GameWorld {
       weaponId: b.weaponId,
     }))
 
-    return { tick: this.tick, players, bullets, winner: this.winner }
+    const hazardBalls = this.hazardBalls.map(h => ({
+      x: Math.round(h.x * 10) / 10,
+      y: Math.round(h.y * 10) / 10,
+      vx: Math.round(h.vx),
+      vy: Math.round(h.vy),
+      color: h.color,
+    }))
+
+    return { tick: this.tick, players, bullets, hazardBalls, winner: this.winner }
   }
 
   getResults() {
