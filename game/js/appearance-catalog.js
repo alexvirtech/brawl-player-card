@@ -95,6 +95,7 @@ const DEFAULT_APPEARANCE = {
   weapon: 'pistol',
   accessory: 'acc-none',
   skinColor: 0,
+  brawlCharacter: 'sirius',
 }
 
 function getAppearanceItem(category, id) {
@@ -102,6 +103,8 @@ function getAppearanceItem(category, id) {
   if (!list) return null
   return list.find(item => item.id === id) || list[0]
 }
+
+const VALID_BRAWL_CHARACTERS = ['sirius', 'kenji', 'nori']
 
 function validateAppearance(app) {
   const result = {}
@@ -114,6 +117,10 @@ function validateAppearance(app) {
     if (key === 'weapon') {
       const w = WEAPON_CATALOG.find(w => w.id === app?.[key])
       result[key] = w ? app[key] : DEFAULT_APPEARANCE[key]
+      continue
+    }
+    if (key === 'brawlCharacter') {
+      result[key] = VALID_BRAWL_CHARACTERS.includes(app?.[key]) ? app[key] : 'sirius'
       continue
     }
     const cat = APPEARANCE_CATALOG[key]

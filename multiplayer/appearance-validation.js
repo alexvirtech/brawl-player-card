@@ -6,6 +6,8 @@ const VALID_PANTS = ['pants-jeans', 'pants-shorts', 'pants-dark', 'pants-combat'
 const VALID_WEAPON = ['pistol', 'shotgun', 'blaster', 'rocket', 'bat', 'grenade', 'sniper', 'smg', 'crossbow', 'flamethrower', 'sword', 'hammer']
 const VALID_ACC = ['acc-none', 'acc-glasses', 'acc-sunglasses', 'acc-backpack', 'acc-scarf', 'acc-scarf-blue', 'acc-cape', 'acc-cape-blue', 'acc-cape-gold', 'acc-medal', 'acc-chain', 'acc-bandolier']
 
+const VALID_BRAWL = ['sirius', 'kenji', 'nori']
+
 const SERVER_DEFAULT_APPEARANCE = {
   body: 'body-default',
   face: 'face-friendly',
@@ -15,6 +17,7 @@ const SERVER_DEFAULT_APPEARANCE = {
   weapon: 'pistol',
   accessory: 'acc-none',
   skinColor: 0,
+  brawlCharacter: 'sirius',
 }
 
 export function validateServerAppearance(app) {
@@ -28,9 +31,12 @@ export function validateServerAppearance(app) {
     weapon: VALID_WEAPON.includes(app.weapon) ? app.weapon : 'pistol',
     accessory: VALID_ACC.includes(app.accessory) ? app.accessory : 'acc-none',
     skinColor: (Number.isInteger(app.skinColor) && app.skinColor >= 0 && app.skinColor <= 9) ? app.skinColor : 0,
+    brawlCharacter: VALID_BRAWL.includes(app.brawlCharacter) ? app.brawlCharacter : 'sirius',
   }
 }
 
 export function validateFigureMode(mode) {
-  return mode === 'advanced' ? 'advanced' : 'simple'
+  if (mode === 'advanced') return 'advanced'
+  if (mode === 'brawl') return 'brawl'
+  return 'simple'
 }

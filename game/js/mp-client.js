@@ -852,7 +852,12 @@ function renderGame(now) {
       }
     }
 
-    if (p.figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
+    if (p.figureMode === 'brawl' && typeof BrawlRenderer !== 'undefined') {
+      const animState = { time: now / 1000, walking: false, dead: !p.alive, hitFlash: 0 }
+      const charId = (p.appearance && p.appearance.brawlCharacter) || 'sirius'
+      BrawlRenderer.drawCharacter(ctx, drawX, drawY, PLAYER_SIZE, p.angle, charId, animState)
+      BrawlRenderer.drawHealthBar(ctx, drawX, drawY - PLAYER_SIZE - 24, p.health, 100)
+    } else if (p.figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
       const animState = { time: now / 1000, walking: false, lowHealth: p.health < 30, dead: !p.alive, hitFlash: 0, attackFlash: 0 }
       AdvancedRenderer.drawCharacter(ctx, drawX, drawY, PLAYER_SIZE, p.angle, p.appearance || {}, animState)
       AdvancedRenderer.drawHealthBar(ctx, drawX, drawY - PLAYER_SIZE - 24, p.health, 100)

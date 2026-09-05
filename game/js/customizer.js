@@ -43,6 +43,14 @@ const Customizer = {
       '#cust-preview{border-radius:12px;background:#0a0a1e}' +
       '#cust-advanced-opts{display:none}' +
       '#cust-advanced-opts.show{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}' +
+      '#cust-brawl-opts{display:none}' +
+      '#cust-brawl-opts.show{display:flex;flex-direction:column;align-items:center;gap:12px}' +
+      '.brawl-cards{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}' +
+      '.brawl-card{width:120px;padding:10px 8px;border:3px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.04);cursor:pointer;transition:all .15s;text-align:center}' +
+      '.brawl-card:hover{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.06)}' +
+      '.brawl-card.selected{border-color:#ffd700;background:rgba(255,215,0,.12);box-shadow:0 0 12px rgba(255,215,0,.2)}' +
+      '.brawl-card canvas{border-radius:8px;background:#0a0a1e;display:block;margin:0 auto 6px}' +
+      '.brawl-card-name{color:#ffd700;font-size:.85rem;font-weight:900;letter-spacing:1px}' +
       '.cust-section{margin:4px 0}' +
       '.cust-section-label{font-size:.7rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}' +
       '.cust-options{display:flex;flex-wrap:wrap;gap:4px}' +
@@ -72,6 +80,7 @@ const Customizer = {
         '<div class="cust-mode-toggle">' +
           '<button class="cust-mode-btn" data-mode="simple" onclick="Customizer._setMode(\'simple\')">SIMPLE</button>' +
           '<button class="cust-mode-btn" data-mode="advanced" onclick="Customizer._setMode(\'advanced\')">ADVANCED</button>' +
+          '<button class="cust-mode-btn" data-mode="brawl" onclick="Customizer._setMode(\'brawl\')">BRAWL STARS</button>' +
         '</div>' +
         '<div id="cust-preview-wrap"><canvas id="cust-preview" width="200" height="200"></canvas></div>' +
         '<div id="cust-advanced-opts">' +
@@ -83,6 +92,13 @@ const Customizer = {
           this._buildSection('Pants', 'pants', APPEARANCE_CATALOG.pants) +
           this._buildSection('Weapon', 'weapon', WEAPON_CATALOG, false, true) +
           this._buildSection('Accessory', 'accessory', APPEARANCE_CATALOG.accessory) +
+        '</div>' +
+        '<div id="cust-brawl-opts">' +
+          '<div class="brawl-cards">' +
+            '<div class="brawl-card" data-brawl="sirius" onclick="Customizer._pickBrawl(\'sirius\')"><canvas width="100" height="100" data-brawl-preview="sirius"></canvas><div class="brawl-card-name">SIRIUS</div></div>' +
+            '<div class="brawl-card" data-brawl="kenji" onclick="Customizer._pickBrawl(\'kenji\')"><canvas width="100" height="100" data-brawl-preview="kenji"></canvas><div class="brawl-card-name">KENJI</div></div>' +
+            '<div class="brawl-card" data-brawl="nori" onclick="Customizer._pickBrawl(\'nori\')"><canvas width="100" height="100" data-brawl-preview="nori"></canvas><div class="brawl-card-name">NORI</div></div>' +
+          '</div>' +
         '</div>' +
         '<div class="cust-actions">' +
           '<button class="cust-reset" onclick="Customizer._reset()">RESET</button>' +
@@ -142,11 +158,10 @@ const Customizer = {
     const btns = this._el.querySelectorAll('.cust-mode-btn')
     btns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode))
     const advPanel = document.getElementById('cust-advanced-opts')
-    if (mode === 'advanced') {
-      advPanel.classList.add('show')
-    } else {
-      advPanel.classList.remove('show')
-    }
+    const brawlPanel = document.getElementById('cust-brawl-opts')
+    advPanel.classList.toggle('show', mode === 'advanced')
+    brawlPanel.classList.toggle('show', mode === 'brawl')
+    if (mode === 'brawl') this._renderBrawlCards()
   },
 
   _pick(cat, val) {
@@ -166,6 +181,36 @@ const Customizer = {
     })
   },
 
+  _pickBrawl(charId) {
+    this._tempAppearance.brawlCharacter = charId
+    this._updateBrawlSelection()
+    this._renderPreview()
+  },
+
+  _renderBrawlCards() {
+    if (typeof BrawlRenderer === 'undefined') return
+    const chars = ['sirius', 'kenji', 'nori']
+    chars.forEach(id => {
+      const canvas = this._el.querySelector('[data-brawl-preview="' + id + '"]')
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      ctx.clearRect(0, 0, 100, 100)
+      ctx.save()
+      ctx.translate(50, 52)
+      ctx.scale(1.6, 1.6)
+      const animState = { time: performance.now() / 1000, walking: false, dead: false, hitFlash: 0 }
+      BrawlRenderer.drawCharacter(ctx, 0, 0, 22, Math.PI / 2, id, animState)
+      ctx.restore()
+    })
+    this._updateBrawlSelection()
+  },
+
+  _updateBrawlSelection() {
+    const charId = this._tempAppearance.brawlCharacter || 'sirius'
+    const cards = this._el.querySelectorAll('.brawl-card')
+    cards.forEach(c => c.classList.toggle('selected', c.dataset.brawl === charId))
+  },
+
   _renderPreview() {
     const ctx = this._previewCtx
     const w = this._previewCanvas.width
@@ -176,7 +221,14 @@ const Customizer = {
     const y = h / 2 + 8
     const scale = 2.2
 
-    if (this._figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
+    if (this._figureMode === 'brawl' && typeof BrawlRenderer !== 'undefined') {
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.scale(scale, scale)
+      const animState = { time: performance.now() / 1000, walking: false, dead: false, hitFlash: 0 }
+      BrawlRenderer.drawCharacter(ctx, 0, 0, 28, Math.PI / 2, this._tempAppearance.brawlCharacter || 'sirius', animState)
+      ctx.restore()
+    } else if (this._figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
       ctx.save()
       ctx.translate(x, y)
       ctx.scale(scale, scale)

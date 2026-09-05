@@ -164,6 +164,16 @@ const Player = {
     const cfg = GAME_CONFIG.player
     const s = cfg.size
 
+    if (this.figureMode === 'brawl' && typeof BrawlRenderer !== 'undefined') {
+      const animState = this.anim ? this.anim.getState() : { hitFlash: this.hitFlash }
+      animState.time = animState.time || performance.now() / 1000
+      animState.walking = this._moving
+      const charId = (this.appearance && this.appearance.brawlCharacter) || 'sirius'
+      BrawlRenderer.drawCharacter(ctx, this.x, this.y, s, this.angle, charId, animState)
+      BrawlRenderer.drawHealthBar(ctx, this.x, this.y - s - 24, this.health, this.maxHealth)
+      return
+    }
+
     if (this.figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
       const animState = this.anim ? this.anim.getState() : { hitFlash: this.hitFlash }
       AdvancedRenderer.drawCharacter(ctx, this.x, this.y, s, this.angle, this.appearance || DEFAULT_APPEARANCE, animState)
