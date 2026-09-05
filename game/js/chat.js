@@ -10,23 +10,11 @@ const Chat = {
   translatedText: '',
   _listening: false,
 
-  show() {
-    const btn = document.getElementById('chat-toggle-btn')
-    if (btn) btn.classList.add('visible')
-  },
-
-  hide() {
-    const btn = document.getElementById('chat-toggle-btn')
-    if (btn) btn.classList.remove('visible')
-    this.close()
-  },
-
   attachSocket(socket, nickname) {
     this.socket = socket
     this.nickname = nickname || ''
     this._bindEvents()
     this._listenSocket()
-    this.show()
   },
 
   updateNickname(name) {
@@ -34,19 +22,13 @@ const Chat = {
   },
 
   _bindEvents() {
-    const toggleBtn = document.getElementById('chat-toggle-btn')
     const closeBtn = document.getElementById('chat-close')
     const input = document.getElementById('chat-input')
     const sendBtn = document.getElementById('chat-send-btn')
     const micBtn = document.getElementById('chat-mic-btn')
-    if (!toggleBtn || !input) return
+    if (!input) return
 
-    toggleBtn.onclick = (e) => {
-      e.stopPropagation()
-      this.toggle()
-    }
-
-    closeBtn.onclick = () => this.close()
+    if (closeBtn) closeBtn.onclick = () => this.close()
 
     input.onkeydown = (e) => {
       e.stopPropagation()
@@ -70,10 +52,10 @@ const Chat = {
     }
 
     const container = document.getElementById('chat-container')
-    container.onmousedown = (e) => e.stopPropagation()
-    container.ontouchstart = (e) => e.stopPropagation()
-    toggleBtn.onmousedown = (e) => e.stopPropagation()
-    toggleBtn.ontouchstart = (e) => e.stopPropagation()
+    if (container) {
+      container.onmousedown = (e) => e.stopPropagation()
+      container.ontouchstart = (e) => e.stopPropagation()
+    }
   },
 
   _listenSocket() {
@@ -110,11 +92,11 @@ const Chat = {
   },
 
   _updateBadge() {
-    const badge = document.getElementById('chat-badge')
+    const badge = document.getElementById('chat-badge-top')
     if (!badge) return
     if (this.unread > 0) {
       badge.textContent = this.unread > 99 ? '99+' : this.unread
-      badge.style.display = 'flex'
+      badge.style.display = 'inline'
     } else {
       badge.style.display = 'none'
     }

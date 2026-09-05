@@ -218,7 +218,6 @@ async function joinByCode(code) {
 }
 
 function setupLobby() {
-  if (typeof Chat !== 'undefined') Chat.show()
   document.getElementById('lobby-code').textContent = mp.gameCode
   document.getElementById('copy-link-btn').onclick = () => {
     const url = window.location.origin + '/game/' + mp.gameCode

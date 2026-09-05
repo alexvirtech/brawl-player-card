@@ -408,53 +408,16 @@
     }
 
     /* === Chat === */
-    #chat-toggle-btn {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.2);
-      background: linear-gradient(135deg, #4488ff, #6644cc);
-      color: #fff;
-      font-size: 1.5rem;
-      cursor: pointer;
-      z-index: 9999;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.15s;
-    }
-    #chat-toggle-btn:hover { transform: scale(1.1); }
-    #chat-toggle-btn:active { transform: scale(0.95); }
-    #chat-badge {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      min-width: 20px;
-      height: 20px;
-      border-radius: 10px;
-      background: #ff3355;
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 800;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 0 5px;
-    }
     #chat-container {
-      position: fixed;
-      bottom: 78px;
-      right: 16px;
-      width: 320px;
-      max-height: 420px;
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 300px;
+      max-height: 380px;
       background: rgba(18, 18, 32, 0.97);
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 14px;
-      z-index: 9999;
+      z-index: 25;
       display: none;
       flex-direction: column;
       overflow: hidden;
@@ -573,7 +536,7 @@
       padding: 40px 10px;
     }
     @media (max-width: 480px) {
-      #chat-container { width: calc(100vw - 32px); bottom: 78px; max-height: 360px; }
+      #chat-container { width: calc(100% - 16px); max-height: 300px; }
     }
   </style>
 </head>
@@ -673,6 +636,7 @@
         <canvas id="mp-canvas" width="960" height="640" draggable="false"></canvas>
         <div id="mp-hud"></div>
         <div id="game-top-btns">
+          <button id="game-chat-btn" class="game-overlay-btn" title="Chat" onclick="Chat.toggle()"><span class="btn-icon">&#x1F4AC;</span> <span id="chat-badge-top" style="display:none;background:#ff3355;color:#fff;font-size:0.6rem;font-weight:800;border-radius:8px;padding:0 4px;margin-left:2px">0</span></button>
           <button id="game-char-btn" class="game-overlay-btn" title="Character" onclick="Customizer.open()"><span class="btn-icon">&#x1F3AD;</span></button>
           <button id="game-pause-btn" class="game-overlay-btn" title="Pause" onclick="mpTogglePause()"><span class="btn-icon">&#x23F8;</span></button>
           <button id="game-account-btn" class="game-overlay-btn" title="Account"><span class="btn-icon">&#x1F464;</span></button>
@@ -681,6 +645,24 @@
         <div id="controls-hint">
           <div class="hint-side hint-move">DRAG to MOVE</div>
           <div class="hint-side hint-shoot">TAP to SHOOT</div>
+        </div>
+        <div id="chat-container">
+          <div id="chat-header">
+            <span>CHAT</span>
+            <button id="chat-close">&times;</button>
+          </div>
+          <div id="chat-messages">
+            <div class="chat-empty">No messages yet</div>
+          </div>
+          <div id="chat-translation">
+            <div class="trans-label">Hebrew &rarr; English</div>
+            <div class="trans-text" id="chat-trans-text"></div>
+          </div>
+          <div id="chat-input-row">
+            <input type="text" id="chat-input" placeholder="Type a message..." maxlength="200" autocomplete="off">
+            <button id="chat-mic-btn" title="Voice input">&#x1F3A4;</button>
+            <button id="chat-send-btn" title="Send">&#x27A4;</button>
+          </div>
         </div>
         <div id="mp-pause-overlay" style="display:none;position:absolute;inset:0;background:rgba(10,10,30,0.85);z-index:30;flex-direction:column;align-items:center;justify-content:center;border-radius:8px">
           <div style="font-size:2.5rem;font-weight:900;color:#ffd700;margin-bottom:20px">PAUSED</div>
@@ -708,27 +690,6 @@
       <div style="text-align:center; margin-top:8px">
         <a href="/game/" style="color:#888; font-size:0.85rem; text-decoration:none">Back to Game Menu</a>
       </div>
-    </div>
-  </div>
-
-  <!-- Chat -->
-  <button id="chat-toggle-btn">&#x1F4AC;<span id="chat-badge">0</span></button>
-  <div id="chat-container">
-    <div id="chat-header">
-      <span>CHAT</span>
-      <button id="chat-close">&times;</button>
-    </div>
-    <div id="chat-messages">
-      <div class="chat-empty">No messages yet</div>
-    </div>
-    <div id="chat-translation">
-      <div class="trans-label">Hebrew &rarr; English</div>
-      <div class="trans-text" id="chat-trans-text"></div>
-    </div>
-    <div id="chat-input-row">
-      <input type="text" id="chat-input" placeholder="Type a message..." maxlength="200" autocomplete="off">
-      <button id="chat-mic-btn" title="Voice input">&#x1F3A4;</button>
-      <button id="chat-send-btn" title="Send">&#x27A4;</button>
     </div>
   </div>
 
