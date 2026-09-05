@@ -181,6 +181,26 @@ export function setupSocket(io, prisma, roomManager) {
       io.to(room.socketRoom).emit('nickname-updated', { playerId, nickname: trimmed })
     })
 
+    socket.on('chat-message', ({ text, original }) => {
+      if (!text || typeof text !== 'string') return
+      const trimmed = text.trim().slice(0, 200)
+      if (!trimmed) return
+      const room = roomManager.getRoomForPlayer(playerId)
+      if (!room) return
+      const slot = room.slots.find(s => s.playerId === playerId)
+      const colorIndex = slot ? slot.colorIndex : 0
+      const colors = ['#4488ff', '#ff4455', '#44dd44', '#ff8844', '#aa55ff']
+      const msg = {
+        playerId,
+        nickname: socket.player.nickname,
+        text: trimmed,
+        color: colors[colorIndex % colors.length],
+        original: (original && typeof original === 'string') ? original.trim().slice(0, 200) : undefined,
+        time: Date.now(),
+      }
+      io.to(room.socketRoom).emit('chat-message', msg)
+    })
+
     socket.on('appearance-update', ({ figureMode, appearance }) => {
       const fm = validateFigureMode(figureMode)
       const app = validateServerAppearance(appearance)

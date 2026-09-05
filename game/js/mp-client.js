@@ -380,6 +380,7 @@ function connectSocketInternal() {
     try { app = JSON.parse(localStorage.getItem('appearance')) } catch (e) {}
     if (!app) app = typeof DEFAULT_APPEARANCE !== 'undefined' ? DEFAULT_APPEARANCE : {}
     mp.socket.emit('appearance-update', { figureMode: fm, appearance: app })
+    if (typeof Chat !== 'undefined') Chat.init(mp.socket, mp.nickname)
   })
 
   mp.socket.on('disconnect', (reason) => {
@@ -472,6 +473,7 @@ function connectSocketInternal() {
     if (pid === mp.myId) {
       mp.nickname = newName
       localStorage.setItem('mp-nickname', newName)
+      if (typeof Chat !== 'undefined') Chat.updateNickname(newName)
     }
   })
 
@@ -555,6 +557,7 @@ function cleanupGame() {
     cancelAnimationFrame(mp.animFrame)
     mp.animFrame = null
   }
+  if (typeof Chat !== 'undefined') Chat.destroy()
 }
 
 function setupGameButtons() {
