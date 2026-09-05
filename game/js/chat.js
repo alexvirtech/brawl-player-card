@@ -9,18 +9,37 @@ const Chat = {
   isRecording: false,
   translatedText: '',
   showTranslation: false,
+  _uiReady: false,
+  _bound: false,
 
   init(socket, nickname) {
     this.socket = socket
-    this.nickname = nickname
-    this.messages = []
-    this.unread = 0
-    this.isOpen = false
-    this.isRecording = false
-    this.translatedText = ''
-    this.showTranslation = false
-    this._injectUI()
-    this._bindEvents()
+    this.nickname = nickname || ''
+    if (!this._uiReady) {
+      this._injectUI()
+      this._uiReady = true
+    }
+    if (!this._bound) {
+      this._bindEvents()
+      this._bound = true
+    }
+    this._setupSocketListeners()
+  },
+
+  show() {
+    if (!this._uiReady) {
+      this._injectUI()
+      this._uiReady = true
+    }
+    if (!this._bound) {
+      this._bindEvents()
+      this._bound = true
+    }
+  },
+
+  attachSocket(socket, nickname) {
+    this.socket = socket
+    this.nickname = nickname || this.nickname
     this._setupSocketListeners()
   },
 
@@ -30,6 +49,8 @@ const Chat = {
     if (el) el.remove()
     const btn = document.getElementById('chat-toggle-btn')
     if (btn) btn.remove()
+    this._uiReady = false
+    this._bound = false
   },
 
   updateNickname(name) {

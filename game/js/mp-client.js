@@ -218,6 +218,7 @@ async function joinByCode(code) {
 }
 
 function setupLobby() {
+  if (typeof Chat !== 'undefined') Chat.show()
   document.getElementById('lobby-code').textContent = mp.gameCode
   document.getElementById('copy-link-btn').onclick = () => {
     const url = window.location.origin + '/game/' + mp.gameCode
@@ -380,7 +381,7 @@ function connectSocketInternal() {
     try { app = JSON.parse(localStorage.getItem('appearance')) } catch (e) {}
     if (!app) app = typeof DEFAULT_APPEARANCE !== 'undefined' ? DEFAULT_APPEARANCE : {}
     mp.socket.emit('appearance-update', { figureMode: fm, appearance: app })
-    if (typeof Chat !== 'undefined') Chat.init(mp.socket, mp.nickname)
+    if (typeof Chat !== 'undefined') Chat.attachSocket(mp.socket, mp.nickname)
   })
 
   mp.socket.on('disconnect', (reason) => {
