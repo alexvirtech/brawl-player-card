@@ -7,6 +7,7 @@ const Player = {
   shootTimer: 0,
   angle: 0,
   hitFlash: 0,
+  shrinkScale: 1,
   figureMode: 'simple',
   appearance: null,
   anim: null,
@@ -47,6 +48,14 @@ const Player = {
     this.hitFlash = 0
   },
 
+  getSize() {
+    return GAME_CONFIG.player.size * this.shrinkScale
+  },
+
+  shrink() {
+    this.shrinkScale = Math.max(0.35, this.shrinkScale * 0.94)
+  },
+
   update(dt) {
     if (!this.alive) return
 
@@ -73,7 +82,7 @@ const Player = {
     this.x += dx * cfg.speed * dt
     this.y += dy * cfg.speed * dt
 
-    const pos = Arena.pushOut(this.x, this.y, cfg.size)
+    const pos = Arena.pushOut(this.x, this.y, this.getSize())
     this.x = pos.x
     this.y = pos.y
 
@@ -133,6 +142,7 @@ const Player = {
       while (diff < -Math.PI) diff += Math.PI * 2
       if (Math.abs(diff) < arc / 2) {
         e.takeDamage(weapon.damage)
+        this.shrink()
         Effects.create(e.x, e.y, weapon.color)
         if (!e.alive) {
           Game.playerScore++
@@ -162,7 +172,7 @@ const Player = {
   draw(ctx) {
     if (!this.alive) return
     const cfg = GAME_CONFIG.player
-    const s = cfg.size
+    const s = this.getSize()
 
     if (this.figureMode === 'brawl' && typeof BrawlRenderer !== 'undefined') {
       const animState = this.anim ? this.anim.getState() : { hitFlash: this.hitFlash }

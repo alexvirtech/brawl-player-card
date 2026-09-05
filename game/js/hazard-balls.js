@@ -83,7 +83,7 @@ const HazardBalls = {
         const dx = ball.x - Player.x
         const dy = ball.y - Player.y
         const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < this.size + GAME_CONFIG.player.size && !ball.hitTimers['player']) {
+        if (dist < this.size + Player.getSize() && !ball.hitTimers['player']) {
           Player.takeDamage(this.damage)
           ball.hitTimers['player'] = this.hitCooldown
           Effects.create(Player.x, Player.y, ball.color)

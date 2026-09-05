@@ -70,6 +70,7 @@ export class GameWorld {
         deaths: 0,
         shootTimer: 0,
         respawnTimer: 0,
+        shrinkScale: 1,
         input: { dx: 0, dy: 0, angle: 0, shooting: false },
         connected: true,
       })
@@ -119,7 +120,8 @@ export class GameWorld {
       p.x += dx * PLAYER_CFG.speed * dt
       p.y += dy * PLAYER_CFG.speed * dt
 
-      const pos = pushOut(p.x, p.y, PLAYER_CFG.size)
+      const pSize = PLAYER_CFG.size * (p.shrinkScale || 1)
+      const pos = pushOut(p.x, p.y, pSize)
       p.x = pos.x
       p.y = pos.y
 
@@ -184,8 +186,11 @@ export class GameWorld {
         const dy = b.y - p.y
         const dist = Math.sqrt(dx * dx + dy * dy)
 
-        if (dist < PLAYER_CFG.size + (b.size || BULLET_CFG.size)) {
+        const targetSize = PLAYER_CFG.size * (p.shrinkScale || 1)
+        if (dist < targetSize + (b.size || BULLET_CFG.size)) {
           p.health -= (b.damage || BULLET_CFG.damage)
+          const shooter = this.players.get(b.ownerId)
+          if (shooter) shooter.shrinkScale = Math.max(0.35, (shooter.shrinkScale || 1) * 0.94)
           this.explosions.push({ x: b.x, y: b.y, color: b.color, radius: b.splash })
           this._splashDamage(b.x, b.y, b.splash, Math.ceil(b.damage * 0.4), b.ownerId, p.id)
           this.bullets.splice(i, 1)
@@ -196,7 +201,6 @@ export class GameWorld {
             p.deaths++
             p.respawnTimer = GAME_CFG.respawnDelay
 
-            const shooter = this.players.get(b.ownerId)
             if (shooter) {
               shooter.kills++
               shooter.score++
@@ -275,7 +279,7 @@ export class GameWorld {
         const dx = ball.x - p.x
         const dy = ball.y - p.y
         const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < ballSize + PLAYER_CFG.size && !ball.hitTimers[p.id]) {
+        if (dist < ballSize + PLAYER_CFG.size * (p.shrinkScale || 1) && !ball.hitTimers[p.id]) {
           p.health -= damage
           ball.hitTimers[p.id] = cooldown
           if (p.health <= 0) {
@@ -296,8 +300,11 @@ export class GameWorld {
       const dx = x - p.x
       const dy = y - p.y
       const dist = Math.sqrt(dx * dx + dy * dy)
-      if (dist < r + PLAYER_CFG.size) {
+      const targetSize = PLAYER_CFG.size * (p.shrinkScale || 1)
+      if (dist < r + targetSize) {
         p.health -= damage
+        const attacker = this.players.get(ownerId)
+        if (attacker) attacker.shrinkScale = Math.max(0.35, (attacker.shrinkScale || 1) * 0.94)
         if (p.health <= 0) {
           p.health = 0
           p.alive = false
@@ -330,6 +337,7 @@ export class GameWorld {
       while (diff < -Math.PI) diff += Math.PI * 2
       if (Math.abs(diff) < arc / 2) {
         p.health -= w.damage
+        attacker.shrinkScale = Math.max(0.35, (attacker.shrinkScale || 1) * 0.94)
         if (p.health <= 0) {
           p.health = 0
           p.alive = false
@@ -372,6 +380,7 @@ export class GameWorld {
         kills: p.kills,
         deaths: p.deaths,
         connected: p.connected,
+        shrinkScale: Math.round((p.shrinkScale || 1) * 100) / 100,
       })
     }
 

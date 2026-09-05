@@ -852,32 +852,34 @@ function renderGame(now) {
       }
     }
 
+    const pSize = PLAYER_SIZE * (p.shrinkScale || 1)
+
     if (p.figureMode === 'brawl' && typeof BrawlRenderer !== 'undefined') {
       const animState = { time: now / 1000, walking: false, dead: !p.alive, hitFlash: 0 }
       const charId = (p.appearance && p.appearance.brawlCharacter) || 'sirius'
-      BrawlRenderer.drawCharacter(ctx, drawX, drawY, PLAYER_SIZE, p.angle, charId, animState)
-      BrawlRenderer.drawHealthBar(ctx, drawX, drawY - PLAYER_SIZE - 24, p.health, 100)
+      BrawlRenderer.drawCharacter(ctx, drawX, drawY, pSize, p.angle, charId, animState)
+      BrawlRenderer.drawHealthBar(ctx, drawX, drawY - pSize - 24, p.health, 100)
     } else if (p.figureMode === 'advanced' && typeof AdvancedRenderer !== 'undefined') {
       const animState = { time: now / 1000, walking: false, lowHealth: p.health < 30, dead: !p.alive, hitFlash: 0, attackFlash: 0 }
-      AdvancedRenderer.drawCharacter(ctx, drawX, drawY, PLAYER_SIZE, p.angle, p.appearance || {}, animState)
-      AdvancedRenderer.drawHealthBar(ctx, drawX, drawY - PLAYER_SIZE - 24, p.health, 100)
+      AdvancedRenderer.drawCharacter(ctx, drawX, drawY, pSize, p.angle, p.appearance || {}, animState)
+      AdvancedRenderer.drawHealthBar(ctx, drawX, drawY - pSize - 24, p.health, 100)
     } else {
       ctx.fillStyle = color.fill
       ctx.beginPath()
-      ctx.arc(drawX, drawY, PLAYER_SIZE, 0, Math.PI * 2)
+      ctx.arc(drawX, drawY, pSize, 0, Math.PI * 2)
       ctx.fill()
       ctx.strokeStyle = color.outline
       ctx.lineWidth = isMe ? 3 : 2
       ctx.stroke()
-      drawFace(ctx, drawX, drawY, PLAYER_SIZE, p.angle)
-      drawHealthBar(ctx, drawX, drawY - PLAYER_SIZE - 16, p.health, 100)
+      drawFace(ctx, drawX, drawY, pSize, p.angle)
+      drawHealthBar(ctx, drawX, drawY - pSize - 16, p.health, 100)
     }
 
     if (isMe) {
       ctx.strokeStyle = '#ffffff55'
       ctx.lineWidth = 2
       ctx.beginPath()
-      ctx.arc(drawX, drawY, PLAYER_SIZE + 4, 0, Math.PI * 2)
+      ctx.arc(drawX, drawY, pSize + 4, 0, Math.PI * 2)
       ctx.stroke()
     }
 
@@ -886,7 +888,7 @@ function renderGame(now) {
       ctx.fillStyle = '#ff4444'
       ctx.font = 'bold 10px sans-serif'
       ctx.textAlign = 'center'
-      ctx.fillText('OFFLINE', drawX, drawY - PLAYER_SIZE - 28)
+      ctx.fillText('OFFLINE', drawX, drawY - pSize - 28)
       ctx.globalAlpha = 1
       ctx.textAlign = 'start'
     }
@@ -894,7 +896,7 @@ function renderGame(now) {
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 11px "Segoe UI", sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(p.nickname + ' [' + p.score + ']', drawX, drawY - PLAYER_SIZE - 22)
+    ctx.fillText(p.nickname + ' [' + p.score + ']', drawX, drawY - pSize - 22)
     ctx.textAlign = 'start'
   })
 

@@ -46,6 +46,7 @@ const Game = {
     Bullets.clear()
     if (typeof HazardBalls !== 'undefined') HazardBalls.init()
 
+    Player.shrinkScale = 1
     Player.spawn()
 
     this.enemies = []
@@ -130,6 +131,7 @@ const Game = {
 
           if (dist < GAME_CONFIG.enemy.size + b.size) {
             enemy.takeDamage(b.damage)
+            Player.shrink()
             Effects.createExplosion(b.x, b.y, b.color, b.splash)
 
             this._splashEnemies(b.x, b.y, b.splash, Math.ceil(b.damage * 0.4), enemy)
@@ -156,7 +158,7 @@ const Game = {
         const dy = b.y - Player.y
         const dist = Math.sqrt(dx * dx + dy * dy)
 
-        if (dist < GAME_CONFIG.player.size + b.size) {
+        if (dist < Player.getSize() + b.size) {
           Player.takeDamage(b.damage)
           Effects.createExplosion(b.x, b.y, b.color, b.splash)
           bullets.splice(i, 1)
@@ -186,6 +188,7 @@ const Game = {
       const dist = Math.sqrt(dx * dx + dy * dy)
       if (dist < radius + GAME_CONFIG.enemy.size) {
         enemy.takeDamage(damage)
+        Player.shrink()
         if (!enemy.alive) {
           this.playerScore++
           UI.updateScore(this.playerScore, this.enemyScore)
@@ -211,7 +214,7 @@ const Game = {
         const dx = e.x - Player.x
         const dy = e.y - Player.y
         const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < e.splashRadius + GAME_CONFIG.player.size) {
+        if (dist < e.splashRadius + Player.getSize()) {
           Player.takeDamage(e.splashDamage)
           if (!Player.alive) {
             this.enemyScore++
