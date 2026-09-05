@@ -557,7 +557,6 @@ function cleanupGame() {
     cancelAnimationFrame(mp.animFrame)
     mp.animFrame = null
   }
-  if (typeof Chat !== 'undefined') Chat.destroy()
 }
 
 function setupGameButtons() {
