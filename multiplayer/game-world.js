@@ -44,6 +44,7 @@ export class GameWorld {
     this.players = new Map()
     this.bullets = []
     this.hazardBalls = []
+    this.explosions = []
     this.tick = 0
     this.winningScore = GAME_CFG.winningScore
     this.winner = null
@@ -150,12 +151,16 @@ export class GameWorld {
               colorIndex: p.colorIndex,
               weaponId,
               life: (w.range / w.speed) * 1000,
+              splash: w.splash || 35,
+              color: '#ffcc44',
             })
           }
         }
         p.shootTimer = w.cooldown
       }
     }
+
+    this.explosions = []
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const b = this.bullets[i]
@@ -167,6 +172,8 @@ export class GameWorld {
           b.x < 0 || b.x > ARENA.width ||
           b.y < 0 || b.y > ARENA.height ||
           pointInWall(b.x, b.y)) {
+        this.explosions.push({ x: b.x, y: b.y, color: b.color, radius: b.splash })
+        this._splashDamage(b.x, b.y, b.splash, Math.ceil(b.damage * 0.4), b.ownerId, null)
         this.bullets.splice(i, 1)
         continue
       }
@@ -179,6 +186,8 @@ export class GameWorld {
 
         if (dist < PLAYER_CFG.size + (b.size || BULLET_CFG.size)) {
           p.health -= (b.damage || BULLET_CFG.damage)
+          this.explosions.push({ x: b.x, y: b.y, color: b.color, radius: b.splash })
+          this._splashDamage(b.x, b.y, b.splash, Math.ceil(b.damage * 0.4), b.ownerId, p.id)
           this.bullets.splice(i, 1)
 
           if (p.health <= 0) {
@@ -280,6 +289,33 @@ export class GameWorld {
     }
   }
 
+  _splashDamage(x, y, radius, damage, ownerId, skipId) {
+    const r = radius || 35
+    for (const p of this.players.values()) {
+      if (!p.alive || p.id === ownerId || p.id === skipId) continue
+      const dx = x - p.x
+      const dy = y - p.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      if (dist < r + PLAYER_CFG.size) {
+        p.health -= damage
+        if (p.health <= 0) {
+          p.health = 0
+          p.alive = false
+          p.deaths++
+          p.respawnTimer = GAME_CFG.respawnDelay
+          const shooter = this.players.get(ownerId)
+          if (shooter) {
+            shooter.kills++
+            shooter.score++
+            if (shooter.score >= this.winningScore) {
+              this.winner = shooter.id
+            }
+          }
+        }
+      }
+    }
+  }
+
   _meleeHit(attacker, w) {
     const range = w.range || 55
     const arc = 1.2
@@ -359,7 +395,14 @@ export class GameWorld {
       color: h.color,
     }))
 
-    return { tick: this.tick, players, bullets, hazardBalls, winner: this.winner }
+    const explosions = this.explosions.map(e => ({
+      x: Math.round(e.x * 10) / 10,
+      y: Math.round(e.y * 10) / 10,
+      color: e.color,
+      radius: e.radius,
+    }))
+
+    return { tick: this.tick, players, bullets, hazardBalls, explosions, winner: this.winner }
   }
 
   getResults() {

@@ -37,16 +37,16 @@ export const GAME_CFG = {
 }
 
 export const WEAPONS = {
-  pistol:       { damage: 25, speed: 500, cooldown: 300,  size: 6,  range: 2000, pellets: 1, spread: 0 },
-  shotgun:      { damage: 15, speed: 450, cooldown: 600,  size: 5,  range: 800,  pellets: 4, spread: 0.25 },
-  blaster:      { damage: 20, speed: 600, cooldown: 250,  size: 7,  range: 2000, pellets: 1, spread: 0 },
-  rocket:       { damage: 45, speed: 300, cooldown: 1200, size: 10, range: 2000, pellets: 1, spread: 0 },
+  pistol:       { damage: 25, speed: 500, cooldown: 300,  size: 6,  range: 2000, pellets: 1, spread: 0,    splash: 35 },
+  shotgun:      { damage: 15, speed: 450, cooldown: 600,  size: 5,  range: 800,  pellets: 4, spread: 0.25, splash: 30 },
+  blaster:      { damage: 20, speed: 600, cooldown: 250,  size: 7,  range: 2000, pellets: 1, spread: 0,    splash: 40 },
+  rocket:       { damage: 45, speed: 300, cooldown: 1200, size: 10, range: 2000, pellets: 1, spread: 0,    splash: 60 },
   bat:          { damage: 35, speed: 0,   cooldown: 500,  size: 0,  range: 55,   pellets: 0, spread: 0, melee: true },
-  grenade:      { damage: 40, speed: 350, cooldown: 1500, size: 8,  range: 1200, pellets: 1, spread: 0 },
-  sniper:       { damage: 50, speed: 900, cooldown: 1500, size: 4,  range: 3000, pellets: 1, spread: 0 },
-  smg:          { damage: 10, speed: 550, cooldown: 120,  size: 4,  range: 1200, pellets: 1, spread: 0.08 },
-  crossbow:     { damage: 35, speed: 700, cooldown: 900,  size: 5,  range: 2500, pellets: 1, spread: 0 },
-  flamethrower: { damage: 8,  speed: 300, cooldown: 60,   size: 8,  range: 400,  pellets: 2, spread: 0.15 },
+  grenade:      { damage: 40, speed: 350, cooldown: 1500, size: 8,  range: 1200, pellets: 1, spread: 0,    splash: 80 },
+  sniper:       { damage: 50, speed: 900, cooldown: 1500, size: 4,  range: 3000, pellets: 1, spread: 0,    splash: 40 },
+  smg:          { damage: 10, speed: 550, cooldown: 120,  size: 4,  range: 1200, pellets: 1, spread: 0.08, splash: 25 },
+  crossbow:     { damage: 35, speed: 700, cooldown: 900,  size: 5,  range: 2500, pellets: 1, spread: 0,    splash: 35 },
+  flamethrower: { damage: 8,  speed: 300, cooldown: 60,   size: 8,  range: 400,  pellets: 2, spread: 0.15, splash: 22 },
   sword:        { damage: 40, speed: 0,   cooldown: 400,  size: 0,  range: 65,   pellets: 0, spread: 0, melee: true },
   hammer:       { damage: 55, speed: 0,   cooldown: 800,  size: 0,  range: 50,   pellets: 0, spread: 0, melee: true },
 }

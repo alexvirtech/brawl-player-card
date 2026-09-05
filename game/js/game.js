@@ -112,6 +112,7 @@ const Game = {
     Bullets.update(dt)
     if (typeof HazardBalls !== 'undefined') HazardBalls.update(dt)
     this.checkCollisions()
+    this.processSplashDamage()
   },
 
   checkCollisions() {
@@ -129,7 +130,10 @@ const Game = {
 
           if (dist < GAME_CONFIG.enemy.size + b.size) {
             enemy.takeDamage(b.damage)
-            Effects.create(b.x, b.y, GAME_CONFIG.bullet.playerColor)
+            Effects.createExplosion(b.x, b.y, b.color, b.splash)
+
+            this._splashEnemies(b.x, b.y, b.splash, Math.ceil(b.damage * 0.4), enemy)
+
             bullets.splice(i, 1)
 
             if (!enemy.alive) {
@@ -154,7 +158,7 @@ const Game = {
 
         if (dist < GAME_CONFIG.player.size + b.size) {
           Player.takeDamage(b.damage)
-          Effects.create(b.x, b.y, GAME_CONFIG.bullet.enemyColor)
+          Effects.createExplosion(b.x, b.y, b.color, b.splash)
           bullets.splice(i, 1)
 
           if (!Player.alive) {
@@ -172,6 +176,58 @@ const Game = {
         }
       }
     }
+  },
+
+  _splashEnemies(x, y, radius, damage, skipEnemy) {
+    for (const enemy of this.enemies) {
+      if (!enemy.alive || enemy === skipEnemy) continue
+      const dx = x - enemy.x
+      const dy = y - enemy.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      if (dist < radius + GAME_CONFIG.enemy.size) {
+        enemy.takeDamage(damage)
+        if (!enemy.alive) {
+          this.playerScore++
+          UI.updateScore(this.playerScore, this.enemyScore)
+          Sound.play('score')
+          if (this.playerScore >= GAME_CONFIG.game.winningScore) {
+            this.endGame(true)
+            return
+          }
+          enemy.startRespawn()
+        }
+      }
+    }
+  },
+
+  processSplashDamage() {
+    const explosions = Bullets._pendingExplosions
+    for (let i = 0; i < explosions.length; i++) {
+      const e = explosions[i]
+      if (e.isPlayer) {
+        this._splashEnemies(e.x, e.y, e.splashRadius, e.splashDamage, null)
+      } else {
+        if (!Player.alive) continue
+        const dx = e.x - Player.x
+        const dy = e.y - Player.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < e.splashRadius + GAME_CONFIG.player.size) {
+          Player.takeDamage(e.splashDamage)
+          if (!Player.alive) {
+            this.enemyScore++
+            UI.updateScore(this.playerScore, this.enemyScore)
+            Sound.play('score')
+            if (this.enemyScore >= GAME_CONFIG.game.winningScore) {
+              this.endGame(false)
+              return
+            }
+            this.state = 'respawning'
+            this.respawnTimer = GAME_CONFIG.game.respawnDelay
+          }
+        }
+      }
+    }
+    Bullets._pendingExplosions = []
   },
 
   endGame(playerWon) {

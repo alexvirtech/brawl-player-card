@@ -1,8 +1,56 @@
 const Effects = {
   list: [],
+  explosionRings: [],
+  explosionParticles: [],
 
   create(x, y, color) {
     this.list.push({ x, y, color, radius: 4, alpha: 1 })
+  },
+
+  createExplosion(x, y, color, splashRadius) {
+    const r = splashRadius || 35
+
+    this.explosionRings.push({
+      x, y,
+      color,
+      radius: r * 0.15,
+      maxRadius: r,
+      alpha: 0.8,
+      type: 'ring',
+    })
+
+    this.explosionRings.push({
+      x, y,
+      color: '#ffffff',
+      radius: r * 0.1,
+      maxRadius: r * 0.5,
+      alpha: 0.6,
+      type: 'flash',
+    })
+
+    this.explosionRings.push({
+      x, y,
+      color: '#ffaa22',
+      radius: r * 0.2,
+      maxRadius: r * 0.7,
+      alpha: 0.5,
+      type: 'flash',
+    })
+
+    const count = 6 + Math.floor(r / 8)
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2
+      const speed = 60 + Math.random() * 160
+      this.explosionParticles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        color: i % 3 === 0 ? '#ffcc22' : i % 3 === 1 ? color : '#ff6622',
+        size: 1.5 + Math.random() * 3,
+        alpha: 1,
+        life: 0.2 + Math.random() * 0.3,
+      })
+    }
   },
 
   update(dt) {
@@ -11,6 +59,25 @@ const Effects = {
       e.radius += dt * 80
       e.alpha -= dt * 4
       if (e.alpha <= 0) this.list.splice(i, 1)
+    }
+
+    for (let i = this.explosionRings.length - 1; i >= 0; i--) {
+      const e = this.explosionRings[i]
+      e.radius += dt * 250
+      e.alpha -= dt * 4.5
+      if (e.alpha <= 0 || e.radius > e.maxRadius) this.explosionRings.splice(i, 1)
+    }
+
+    for (let i = this.explosionParticles.length - 1; i >= 0; i--) {
+      const p = this.explosionParticles[i]
+      p.x += p.vx * dt
+      p.y += p.vy * dt
+      p.vx *= 0.94
+      p.vy *= 0.94
+      p.life -= dt
+      p.alpha = Math.max(0, p.life / 0.4)
+      p.size *= 0.97
+      if (p.life <= 0) this.explosionParticles.splice(i, 1)
     }
   },
 
@@ -22,19 +89,52 @@ const Effects = {
       ctx.beginPath()
       ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2)
       ctx.stroke()
-      ctx.globalAlpha = 1
     })
+
+    this.explosionRings.forEach(e => {
+      ctx.globalAlpha = Math.max(0, e.alpha)
+      if (e.type === 'flash') {
+        ctx.fillStyle = e.color
+        ctx.beginPath()
+        ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2)
+        ctx.fill()
+      } else {
+        ctx.strokeStyle = e.color
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+    })
+
+    this.explosionParticles.forEach(p => {
+      ctx.globalAlpha = Math.max(0, p.alpha)
+      ctx.fillStyle = p.color
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+      ctx.fill()
+    })
+
+    ctx.globalAlpha = 1
+  },
+
+  clear() {
+    this.list = []
+    this.explosionRings = []
+    this.explosionParticles = []
   },
 }
 
 const Bullets = {
   list: [],
   _smokeTrails: [],
+  _pendingExplosions: [],
 
   clear() {
     this.list = []
     this._smokeTrails = []
-    Effects.list = []
+    this._pendingExplosions = []
+    Effects.clear()
   },
 
   create(x, y, dirX, dirY, isPlayer, weaponId) {
@@ -64,6 +164,7 @@ const Bullets = {
           isPlayer, weaponId: w.id,
           angle: a,
           life: (w.range / speed) * 1000,
+          splash: w.splash || 35,
         })
       }
       return
@@ -80,6 +181,7 @@ const Bullets = {
       weaponId: w ? w.id : 'pistol',
       angle,
       life: w ? (w.range / speed) * 1000 : cfg.lifetime,
+      splash: w ? (w.splash || 35) : 35,
     })
   },
 
@@ -106,9 +208,13 @@ const Bullets = {
         b.y < 0 || b.y > Arena.height ||
         Arena.pointInWall(b.x, b.y)
       ) {
-        if (Arena.pointInWall(b.x, b.y)) {
-          Effects.create(b.x, b.y, '#aaaaaa')
-        }
+        Effects.createExplosion(b.x, b.y, b.color, b.splash)
+        this._pendingExplosions.push({
+          x: b.x, y: b.y,
+          isPlayer: b.isPlayer,
+          splashDamage: Math.ceil(b.damage * 0.4),
+          splashRadius: b.splash,
+        })
         this.list.splice(i, 1)
       }
     }

@@ -13,6 +13,7 @@ const WEAPON_CATALOG = [
     trailColor: '#ffcc4444',
     sound: 'shoot',
     recoil: 2,
+    splash: 35,
   },
   {
     id: 'shotgun',
@@ -29,6 +30,7 @@ const WEAPON_CATALOG = [
     trailColor: '#ff884444',
     sound: 'shoot',
     recoil: 5,
+    splash: 30,
   },
   {
     id: 'blaster',
@@ -45,6 +47,7 @@ const WEAPON_CATALOG = [
     sound: 'shoot',
     recoil: 3,
     glow: true,
+    splash: 40,
   },
   {
     id: 'rocket',
@@ -109,6 +112,7 @@ const WEAPON_CATALOG = [
     trailColor: '#ff224444',
     sound: 'shoot',
     recoil: 8,
+    splash: 40,
   },
   {
     id: 'smg',
@@ -124,6 +128,7 @@ const WEAPON_CATALOG = [
     trailColor: '#ffaa2244',
     sound: 'shoot',
     recoil: 1,
+    splash: 25,
   },
   {
     id: 'crossbow',
@@ -139,6 +144,7 @@ const WEAPON_CATALOG = [
     trailColor: '#aa663344',
     sound: 'shoot',
     recoil: 4,
+    splash: 35,
   },
   {
     id: 'flamethrower',
@@ -155,6 +161,7 @@ const WEAPON_CATALOG = [
     trailColor: '#ff662244',
     sound: 'shoot',
     recoil: 0,
+    splash: 22,
   },
   {
     id: 'sword',

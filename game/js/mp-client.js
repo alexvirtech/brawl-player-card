@@ -54,6 +54,8 @@ let mp = {
   lastRenderTime: 0,
   paused: false,
   smokeTrails: [],
+  explosionRings: [],
+  explosionParticles: [],
 }
 
 function showScreen(id) {
@@ -423,6 +425,8 @@ function connectSocketInternal() {
     mp.effects = []
     mp.notifications = []
     mp.smokeTrails = []
+    mp.explosionRings = []
+    mp.explosionParticles = []
     if (typeof getRandomTheme !== 'undefined') getRandomTheme()
     showScreen('game')
     initGameCanvas()
@@ -687,6 +691,90 @@ function renderGame(now) {
     const sz = b.size || 6
     Bullets._drawProjectile(ctx, bx, by, sz, angle, wid, color.bullet)
   })
+
+  if (mp.snapshot.explosions) {
+    mp.snapshot.explosions.forEach(e => {
+      const r = e.radius || 35
+      const col = e.color || '#ffcc44'
+
+      mp.explosionRings.push({
+        x: e.x, y: e.y,
+        color: col,
+        radius: r * 0.15,
+        maxRadius: r,
+        alpha: 0.8,
+        type: 'ring',
+      })
+      mp.explosionRings.push({
+        x: e.x, y: e.y,
+        color: '#ffffff',
+        radius: r * 0.1,
+        maxRadius: r * 0.5,
+        alpha: 0.6,
+        type: 'flash',
+      })
+      mp.explosionRings.push({
+        x: e.x, y: e.y,
+        color: '#ffaa22',
+        radius: r * 0.2,
+        maxRadius: r * 0.7,
+        alpha: 0.5,
+        type: 'flash',
+      })
+
+      const count = 6 + Math.floor(r / 8)
+      for (let j = 0; j < count; j++) {
+        const a = Math.random() * Math.PI * 2
+        const spd = 60 + Math.random() * 160
+        mp.explosionParticles.push({
+          x: e.x, y: e.y,
+          vx: Math.cos(a) * spd,
+          vy: Math.sin(a) * spd,
+          color: j % 3 === 0 ? '#ffcc22' : j % 3 === 1 ? col : '#ff6622',
+          size: 1.5 + Math.random() * 3,
+          alpha: 1,
+          life: 0.2 + Math.random() * 0.3,
+        })
+      }
+    })
+  }
+
+  for (let i = mp.explosionRings.length - 1; i >= 0; i--) {
+    const e = mp.explosionRings[i]
+    e.radius += renderDt * 250
+    e.alpha -= renderDt * 4.5
+    if (e.alpha <= 0 || e.radius > e.maxRadius) { mp.explosionRings.splice(i, 1); continue }
+    ctx.globalAlpha = Math.max(0, e.alpha)
+    if (e.type === 'flash') {
+      ctx.fillStyle = e.color
+      ctx.beginPath()
+      ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2)
+      ctx.fill()
+    } else {
+      ctx.strokeStyle = e.color
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2)
+      ctx.stroke()
+    }
+  }
+  for (let i = mp.explosionParticles.length - 1; i >= 0; i--) {
+    const p = mp.explosionParticles[i]
+    p.x += p.vx * renderDt
+    p.y += p.vy * renderDt
+    p.vx *= 0.94
+    p.vy *= 0.94
+    p.life -= renderDt
+    p.alpha = Math.max(0, p.life / 0.4)
+    p.size *= 0.97
+    if (p.life <= 0) { mp.explosionParticles.splice(i, 1); continue }
+    ctx.globalAlpha = Math.max(0, p.alpha)
+    ctx.fillStyle = p.color
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.globalAlpha = 1
 
   if (mp.snapshot.hazardBalls) {
     const ballSize = 14
